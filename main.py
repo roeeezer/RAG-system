@@ -13,7 +13,7 @@ class Rag:
     def answer_queries(self, queries):
         data = self.pre_process_impl.pre_proccess_data()
         index = self.index_data_impl.index_data(data)
-        answer_sources = self.retrieve_answer_source_impl.retrieve_answer_source(queries, index)
+        answer_sources = self.retrieve_answer_source_impl.retrieve_answer_source(queries, index, data)
         return self.get_final_answers_impl.get_final_answers(answer_sources)
 
 def run_rag():
