@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import bm25s
-from common import WebTextUnit
+from components.common import WebTextUnit
 
 class IndexerInferface(ABC):
     @abstractmethod
@@ -22,7 +22,7 @@ class Bm25Indexer(IndexerInferface):
     def index_data(self, web_text_units : list[WebTextUnit]):
         self.web_text_units = web_text_units
         # Prepare the corpus for BM25
-        corpus = [u.text for u in web_text_units]
+        corpus = [u.get_text() for u in web_text_units]
 
         # Initialize BM25 index
         self.index = bm25s.BM25()
