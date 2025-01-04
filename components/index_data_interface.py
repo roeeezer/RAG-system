@@ -33,11 +33,7 @@ class Bm25Indexer(IndexerInferface):
         # 2) Build the index using these tokens
         self.index.index(self.corpus_tokens)
 
-    def retrieve_answer_source(self, queries, k=5):
-        # Your implementation here
-        answers = []
-        for query in queries:
-            answers.append(self.bm25_retrieve(query["query"], k))
+        return self.index
 
     def bm25_retrieve(self, query, k):
         # Tokenize the query and map tokens using the corpus dictionary
@@ -58,5 +54,12 @@ class Bm25Indexer(IndexerInferface):
 
 
         return [self.web_text_units[doc_idx] for doc_idx in doc_indices]
+    
+    def retrieve_answer_source(self, queries, k=5):
+        # Your implementation here
+        answers = []
+        for query in queries:
+            answers.append(self.bm25_retrieve(query, k))
+        return answers
 
 
