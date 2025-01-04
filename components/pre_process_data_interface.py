@@ -22,10 +22,14 @@ class CustomConverter(MarkdownConverter):
         return "[טבלה]"
     
 class WebDataPreProccessor(PreProcessDataInterface):
+    def __init__(self, data_path: str):
+        self.data_path = data_path
+        
     def pre_proccess_data(self) -> list[WebTextUnit]:
         res = []
-        for index, html_file_path in enumerate(glob.iglob("created_kol_zchut_corpus_small/pages/*.html")):
-            html_content = BeautifulSoup(open(html_file_path, encoding='utf-8').read(), "html.parser")
+        for index, html_file_path in enumerate(glob.iglob(f"{self.data_path}/pages/*.html")):
+            with open(html_file_path, encoding='utf-8') as file:
+                html_content = BeautifulSoup(file.read(), "html.parser")
             document_id = html_file_path.split("/")[-1].replace(".html", "").replace("pages\\", "")
             page_title = html_content.title.contents[0]
             
@@ -50,5 +54,5 @@ class WebDataPreProccessor(PreProcessDataInterface):
                 section_content = "#" + section_content
                 section_title, section_body = section_content.split("\n", 1)
                 
-                res.append(WebTextSection(document_id, i, page_title + section_title + section_body))
+                res.append(WebTextSection(document_id, str(i), page_title + section_title + section_body))
         return res
