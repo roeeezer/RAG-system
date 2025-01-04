@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import bm25s
-from components.common import WebTextUnit
+from components.web_text_unit import WebTextUnit
 
 class IndexerInferface(ABC):
     @abstractmethod

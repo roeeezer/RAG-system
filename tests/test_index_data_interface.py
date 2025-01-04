@@ -6,7 +6,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from components.index_data_interface import Bm25Indexer
-from components.common import WebTextSection
+from components.web_text_unit import WebTextSection
 
 class TestBm25Indexer(unittest.TestCase):
     def setUp(self):
