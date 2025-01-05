@@ -8,7 +8,7 @@ class IndexerInferface(ABC):
         pass
 
     @abstractmethod
-    def retrieve_answer_source(self, queries):
+    def retrieve_answer_source(self, queries, k) -> list[WebTextUnit]:
         pass
 
 class Bm25Indexer(IndexerInferface):
@@ -55,7 +55,7 @@ class Bm25Indexer(IndexerInferface):
 
         return [self.web_text_units[doc_idx] for doc_idx in doc_indices]
     
-    def retrieve_answer_source(self, queries, k=5):
+    def retrieve_answer_source(self, queries, k=1) -> list[WebTextUnit]:
         # Your implementation here
         answers = []
         for query in queries:

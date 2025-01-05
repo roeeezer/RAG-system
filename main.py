@@ -12,10 +12,10 @@ class Rag:
         web_text_units = self.pre_proccessor.pre_proccess_data()
         self.index_data_impl.index_data(web_text_units)
         answer_sources = self.index_data_impl.retrieve_answer_source(queries)
-        return self.get_final_answers_impl.get_final_answers(answer_sources)
+        return self.get_final_answers_impl.get_final_answers(queries, answer_sources)
 
 def run_rag():
-    queries = ["מאיזה גיל אפשר לפרוש לפנסיה?"]
+    queries = ["מי ממן את הוצאות הקבורה ושירותי הקבורה המקובלים?"]
 
     pre_proccessor = WebDataPreProccessor("created_kol_zchut_corpus_small")
     index_data_impl = Bm25Indexer()
