@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import bm25s
 from components.web_text_unit import WebTextUnit
+from components.query import Query
 
 class IndexerInferface(ABC):
     @abstractmethod
@@ -55,11 +56,6 @@ class Bm25Indexer(IndexerInferface):
 
         return [self.web_text_units[doc_idx] for doc_idx in doc_indices]
     
-    def retrieve_answer_source(self, queries, k=1) -> list[WebTextUnit]:
-        # Your implementation here
-        answers = []
+    def retrieve_answer_source(self, queries: list[Query], k=1) -> list[WebTextUnit]:
         for query in queries:
-            answers.append(self.bm25_retrieve(query, k))
-        return answers
-
-
+            query.answer_source = self.bm25_retrieve(query.query, k)

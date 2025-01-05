@@ -14,6 +14,14 @@ def test_csv_file_format():
     for line in lines:
         print(line)
 
+def read_eval_set():
+    current_directory_path = os.getcwd()
+    file_name = "eval-set.csv"
+    file_path = os.path.join(current_directory_path, file_name)
+    lines = open(file_path, encoding='utf-8').readlines()
+    for line in lines:
+        print(line)
+
 def get_api_key():
     current_directory_path = os.getcwd()
     tests_outputs_folder_name = "untracked"
@@ -30,7 +38,7 @@ def test_gemini_api_call():
     print(response.text)
 
 def main():
-    test_gemini_api_call()
+    read_eval_set()
 
 if __name__ == "__main__":
     main()

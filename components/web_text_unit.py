@@ -10,7 +10,6 @@ class WebTextUnit(ABC):
         pass
 
 class WebTextSection:
-
     def __init__(self, doc_id, section_id, text):
         self.doc_id = doc_id
         self.section_id = section_id
@@ -21,3 +20,10 @@ class WebTextSection:
 
     def get_text(self) -> str:
         return self.text
+
+    def to_dict(self):
+        return {
+            "doc_id": self.doc_id,
+            "section_id": self.section_id,
+            "text": self.text
+        }

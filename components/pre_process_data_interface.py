@@ -4,6 +4,7 @@ import glob
 import re
 from markdownify import MarkdownConverter
 from components.web_text_unit import WebTextUnit, WebTextSection
+from tqdm import tqdm
 
 class PreProcessDataInterface(ABC):
     @abstractmethod
@@ -27,7 +28,8 @@ class WebDataPreProccessor(PreProcessDataInterface):
         
     def pre_proccess_data(self) -> list[WebTextUnit]:
         res = []
-        for index, html_file_path in enumerate(glob.iglob(f"{self.data_path}/pages/*.html")):
+        html_files = glob.glob(f"{self.data_path}/pages/*.html")
+        for index, html_file_path in enumerate(tqdm(html_files, desc="Processing HTML files")):
             with open(html_file_path, encoding='utf-8') as file:
                 html_content = BeautifulSoup(file.read(), "html.parser")
             document_id = html_file_path.split("/")[-1].replace(".html", "").replace("pages\\", "")
