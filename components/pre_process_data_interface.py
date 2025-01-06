@@ -5,11 +5,10 @@ import re
 from markdownify import MarkdownConverter
 from components.web_text_unit import WebTextUnit, WebTextSection
 from tqdm import tqdm
-
-class PreProcessDataInterface(ABC):
-    @abstractmethod
-    def pre_proccess_data(self) -> list[WebTextUnit]:
-        pass
+import pickle
+import time
+from typing import List
+import os
 
 class CustomConverter(MarkdownConverter):
     # don't format markdown links, return only their text, not their URL
@@ -21,10 +20,56 @@ class CustomConverter(MarkdownConverter):
     def convert_table(self, element, text, convert_as_inline):
         """Skip table formatting, replace with placeholder"""
         return "[טבלה]"
-    
-class WebDataPreProccessor(PreProcessDataInterface):
+
+class PreProcessDataInterface(ABC):
     def __init__(self, data_path: str):
         self.data_path = data_path
+        self.cache_file = os.path.join("cache", f"{self.data_path}.pkl")
+
+    @abstractmethod
+    def pre_proccess_data(self) -> list[WebTextUnit]:
+        """Each implementation must provide its own data processing logic"""
+        pass
+
+    def load_or_process_data(self) -> List[WebTextSection]:
+        """
+        Shared caching logic for all implementations.
+        Attempts to load preprocessed data from cache, falls back to processing files
+        if cache doesn't exist.
+        """
+        try:
+            start_time = time.time()
+            data = self._load_from_cache()
+            load_time = time.time() - start_time
+            print(f"Loaded cached data in {load_time:.2f} seconds")
+            return data
+        except FileNotFoundError:
+            start_time = time.time()
+            data = self.pre_proccess_data()  # Calls the implementation-specific method
+            process_time = time.time() - start_time
+            
+            # Save to cache
+            save_start = time.time()
+            self._save_to_cache(data)
+            save_time = time.time() - save_start
+            
+            print(f"Processed files in {process_time:.2f} seconds")
+            print(f"Saved cache in {save_time:.2f} seconds")
+            
+            return data
+
+    def _save_to_cache(self, data: List[WebTextSection]):
+        """Shared method to save processed data to pickle file"""
+        os.makedirs(os.path.dirname(self.cache_file), exist_ok=True)
+        with open(self.cache_file, 'wb') as f:
+            pickle.dump(data, f)
+
+    def _load_from_cache(self) -> List[WebTextSection]:
+        """Shared method to load processed data from pickle file"""
+        with open(self.cache_file, 'rb') as f:
+            return pickle.load(f)
+    
+class WebDataPreProccessor(PreProcessDataInterface):
         
     def pre_proccess_data(self) -> list[WebTextUnit]:
         res = []

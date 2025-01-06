@@ -51,9 +51,9 @@ class GeminiFreeTierAnswerRetriever(LlmAnswerRetrieverInterface):
         filled_pattern = pattern.replace("{Query}", query).replace("{AnswerSource}", answer_source)
         return filled_pattern
 
-    def retrieve_final_answers(self, queries):
+    def retrieve_final_answers(self, queries: list[Query]):
         for query in tqdm(queries, desc="Retrieving final answers from Gemini"):
             if len(query.answer_source) > 0:
-                llm_input = self.get_llm_input(query.query, query.answer_source[0].get_text())
+                llm_input = self.get_llm_input(query.query, query.answer_source[0].get_content())
                 llm_output = self.get_llm_output(llm_input)
                 query.final_answer = llm_output

@@ -16,8 +16,8 @@ class TestBm25Indexer(unittest.TestCase):
     def test_retrieve_answer_source(self):
         try:
             data = [
-                WebTextSection(doc_id="1", section_id="1", text="This is a test document."),
-                WebTextSection(doc_id="2", section_id="1", text="This is another document.")
+                WebTextSection(doc_id="1", section_id="1", content="This is a test document."),
+                WebTextSection(doc_id="2", section_id="1", content="This is another document.")
             ]
             self.indexer.index_data(data)
             queries = ["test document"]

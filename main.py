@@ -5,7 +5,7 @@ from components.index_data_interface import IndexerInferface, Bm25Indexer
 from components.llm_answer_retriever_interface import LlmAnswerRetrieverInterface, GeminiFreeTierAnswerRetriever
 from components.rag_results import RagResults
 
-use_small_data = True
+use_small_data = False
 small_suffix = "_small" if use_small_data else ""
 eval_set_name = f'eval-set{small_suffix}.csv'
 web_database_name = f'created_kol_zchut_corpus{small_suffix}'
@@ -17,7 +17,7 @@ class Rag:
         self.final_answers_retrievers = get_final_answers_impl
 
     def answer_queries(self, queries: list[Query]):
-        web_text_units = self.pre_proccessor.pre_proccess_data()
+        web_text_units = self.pre_proccessor.load_or_process_data()
         self.index_data_impl.index_data(web_text_units)
         self.index_data_impl.retrieve_answer_source(queries)
         self.final_answers_retrievers.retrieve_final_answers(queries)

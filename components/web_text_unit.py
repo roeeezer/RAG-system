@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 class WebTextUnit(ABC):
     @abstractmethod
@@ -6,24 +7,24 @@ class WebTextUnit(ABC):
         pass
 
     @abstractmethod
-    def get_text(self) -> str:
+    def get_content(self) -> str:
         pass
 
+@dataclass
 class WebTextSection:
-    def __init__(self, doc_id, section_id, text):
-        self.doc_id = doc_id
-        self.section_id = section_id
-        self.text = text
+    doc_id: str
+    section_id: str
+    content: str
 
     def get_id(self) -> str:
         return self.doc_id + "_" + self.section_id
 
-    def get_text(self) -> str:
-        return self.text
+    def get_content(self) -> str:
+        return self.content
 
     def to_dict(self):
         return {
             "doc_id": self.doc_id,
             "section_id": self.section_id,
-            "text": self.text
+            "text": self.content
         }
