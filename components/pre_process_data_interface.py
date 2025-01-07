@@ -77,6 +77,9 @@ class WebDataPreProccessor(PreProcessDataInterface):
         for index, html_file_path in enumerate(tqdm(html_files, desc="Processing HTML files")):
             with open(html_file_path, encoding='utf-8') as file:
                 html_content = BeautifulSoup(file.read(), "html.parser")
+            # throw error if no content
+            if html_content is None:
+                raise ValueError(f"Could not parse HTML file: {html_file_path}")
             document_id = html_file_path.split("/")[-1].replace(".html", "").replace("pages\\", "")
             page_title = html_content.title.contents[0]
             
@@ -102,4 +105,6 @@ class WebDataPreProccessor(PreProcessDataInterface):
                 section_title, section_body = section_content.split("\n", 1)
                 
                 res.append(WebTextSection(document_id, str(i), page_title + section_title + section_body))
+
+
         return res

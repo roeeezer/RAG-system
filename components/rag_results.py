@@ -7,13 +7,17 @@ class RagResults:
         self.pre_proccessor_name = pre_proccessor_name
         self.index_data_impl_name = index_data_impl_name
         self.get_final_answers_impl_name = get_final_answers_impl_name
+        self.recall = self.recall_at_k(queries, k=20)
+        self.mmr = self.mrr(queries, k=20)  
 
     def to_dict(self):
         return {
             "queries": [self.query_to_dict(query) for query in self.queries],
             "pre_proccessor_name": self.pre_proccessor_name,
             "index_data_impl_name": self.index_data_impl_name,
-            "get_final_answers_impl_name": self.get_final_answers_impl_name
+            "get_final_answers_impl_name": self.get_final_answers_impl_name,
+            "recall": self.recall,
+            "mmr": self.mmr
         }
 
     def query_to_dict(self, query):
@@ -23,8 +27,36 @@ class RagResults:
             "answer_source": [section.to_dict() for section in query.answer_source] if query.answer_source else None,
             "final_answer": query.final_answer
         }
+    
 
     def save_to_file(self, file_path):
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(self.to_dict(), f, ensure_ascii=False, indent=4)
+    
+    
+    @staticmethod
+    def mrr(queries, k=100):
+        s = 0.0
+        for q in queries:
+            relevant_id = q.gold_doc_id
+            topk_doc_ids = [section.doc_id for section in q.answer_source[:k]]
+            rr = 0.0
+            for rank, doc_id in enumerate(topk_doc_ids, start=1):
+                if doc_id == relevant_id:
+                    rr = 1.0 / rank
+                    break
+            s += rr
+        return s / len(queries) if queries else 0.0
+    
+    @staticmethod
+    def recall_at_k( queries, k=20):
+        hits = 0
+        for q in queries:
+            # Our query object is assumed to have a .gold_doc_id and .query
+            relevant_id = q.gold_doc_id
+            # Retrieve top-k doc_ids based on the query text
+            topk_doc_ids = [section.doc_id for section in q.answer_source[:k]]
+            if relevant_id in topk_doc_ids:
+                hits += 1
+        return hits / len(queries) if queries else 0.0
