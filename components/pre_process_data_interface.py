@@ -118,8 +118,10 @@ class WebDataPreProccessor(PreProcessDataInterface):
                     continue  # Skip empty sections
                     
                 # Restore header marker and split into title and body
-                section_content = "#" + section_content
+                section_content = section_content
                 section_title, section_body = section_content.split("\n", 1)
+                if "גורמים מסייעים" in section_title:
+                    continue
                 debug_print(f"### section {i} ###")
                 debug_print(f"section_title:\n {reverse_lines(section_title)}")
                 debug_print(f"section_body:\n {reverse_lines(section_body)}")

@@ -4,6 +4,7 @@ from components.query import Query
 
 class RagResults:
     def __init__(self, queries, pre_proccessor_name, index_data_impl_name, get_final_answers_impl_name):
+        self.version = "1.0.0"
         self.queries = queries
         self.pre_proccessor_name = pre_proccessor_name
         self.index_data_impl_name = index_data_impl_name
@@ -13,6 +14,7 @@ class RagResults:
 
     def to_dict(self):
         return {
+            "version": self.version,
             "queries": [self.query_to_dict(query) for query in self.queries],
             "pre_proccessor_name": self.pre_proccessor_name,
             "index_data_impl_name": self.index_data_impl_name,
