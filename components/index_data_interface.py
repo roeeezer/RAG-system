@@ -58,4 +58,4 @@ class Bm25Indexer(IndexerInferface):
     
     def retrieve_answer_source(self, queries: list[Query], k=1) -> list[WebTextUnit]:
         for query in queries:
-            query.answer_source = self.bm25_retrieve(query.query, k)
+            query.answer_sources = self.bm25_retrieve(query.query, k)

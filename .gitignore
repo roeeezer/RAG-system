@@ -3,6 +3,6 @@ untracked/
 components/__pycache__/
 tests/__pycache__/
 __pycache__/
-created_kol_zchut_corpus/
-created_kol_zchut_corpus_small/
+kolzchut/
+kolzchut_small/
 cache/

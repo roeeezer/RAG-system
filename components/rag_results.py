@@ -1,5 +1,6 @@
 import json
 import os
+from components.query import Query
 
 class RagResults:
     def __init__(self, queries, pre_proccessor_name, index_data_impl_name, get_final_answers_impl_name):
@@ -20,11 +21,11 @@ class RagResults:
             "mmr": self.mmr
         }
 
-    def query_to_dict(self, query):
+    def query_to_dict(self, query: Query):
         return {
             "gold_doc_id": query.gold_doc_id,
             "query": query.query,
-            "answer_source": [section.to_dict() for section in query.answer_source] if query.answer_source else None,
+            "answer_source": [section.to_dict() for section in query.answer_sources] if query.answer_sources else None,
             "final_answer": query.final_answer
         }
     
@@ -36,11 +37,11 @@ class RagResults:
     
     
     @staticmethod
-    def mrr(queries, k=100):
+    def mrr(queries : list[Query], k=100):
         s = 0.0
         for q in queries:
             relevant_id = q.gold_doc_id
-            topk_doc_ids = [section.doc_id for section in q.answer_source[:k]]
+            topk_doc_ids = [section.doc_id for section in q.answer_sources[:k]]
             rr = 0.0
             for rank, doc_id in enumerate(topk_doc_ids, start=1):
                 if doc_id == relevant_id:
@@ -50,13 +51,13 @@ class RagResults:
         return s / len(queries) if queries else 0.0
     
     @staticmethod
-    def recall_at_k( queries, k=20):
+    def recall_at_k(queries : list[Query], k=20):
         hits = 0
         for q in queries:
             # Our query object is assumed to have a .gold_doc_id and .query
             relevant_id = q.gold_doc_id
             # Retrieve top-k doc_ids based on the query text
-            topk_doc_ids = [section.doc_id for section in q.answer_source[:k]]
+            topk_doc_ids = set([section.doc_id for section in q.answer_sources[:k]])
             if relevant_id in topk_doc_ids:
                 hits += 1
         return hits / len(queries) if queries else 0.0

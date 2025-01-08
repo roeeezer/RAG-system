@@ -1,21 +1,10 @@
 import os
-from abc import ABC, abstractmethod
 import google.generativeai as genai
 from components.web_text_unit import WebTextSection
 from components.query import Query
 import time
 from tqdm import tqdm
-
-def reverse_lines(paragraph):
-   # Split to lines, reverse each line's chars, rejoin with newlines
-   lines = paragraph.split('\n')
-   reversed_lines = [''.join(reversed(line)) for line in lines]
-   return '\n'.join(reversed_lines)
-
-class LlmAnswerRetrieverInterface(ABC):
-    @abstractmethod
-    def retrieve_final_answers(self, queries: list[Query]):
-        pass
+from components.LlmAnswerRetriever.llm_answer_retriever_interface import LlmAnswerRetrieverInterface
 
 class GeminiFreeTierAnswerRetriever(LlmAnswerRetrieverInterface):
     def get_api_key(self):
@@ -53,7 +42,7 @@ class GeminiFreeTierAnswerRetriever(LlmAnswerRetrieverInterface):
 
     def retrieve_final_answers(self, queries: list[Query]):
         for query in tqdm(queries, desc="Retrieving final answers from Gemini"):
-            if len(query.answer_source) > 0:
-                llm_input = self.get_llm_input(query.query, " ".join([source.get_content() for source in query.answer_source]))
+            if len(query.answer_sources) > 0:
+                llm_input = self.get_llm_input(query.query, " ".join([source.get_content() for source in query.answer_sources]))
                 llm_output = self.get_llm_output(llm_input)
                 query.final_answer = llm_output

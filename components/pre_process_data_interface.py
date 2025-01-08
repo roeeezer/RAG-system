@@ -10,6 +10,12 @@ import time
 from typing import List
 import os
 
+debug_mode = False
+
+def debug_print(*args, **kwargs):
+    if debug_mode:
+        print(*args, **kwargs)
+
 class CustomConverter(MarkdownConverter):
     # don't format markdown links, return only their text, not their URL
     def convert_a(self, element, text, convert_as_inline):
@@ -20,6 +26,12 @@ class CustomConverter(MarkdownConverter):
     def convert_table(self, element, text, convert_as_inline):
         """Skip table formatting, replace with placeholder"""
         return "[טבלה]"
+
+def reverse_lines(paragraph):
+   # Split to lines, reverse each line's chars, rejoin with newlines
+   lines = paragraph.split('\n')
+   reversed_lines = [''.join(reversed(line)) for line in lines]
+   return '\n'.join(reversed_lines)
 
 class PreProcessDataInterface(ABC):
     def __init__(self, data_path: str):
@@ -70,11 +82,15 @@ class PreProcessDataInterface(ABC):
             return pickle.load(f)
     
 class WebDataPreProccessor(PreProcessDataInterface):
-        
+
     def pre_proccess_data(self) -> list[WebTextUnit]:
         res = []
         html_files = glob.glob(f"{self.data_path}/pages/*.html")
-        for index, html_file_path in enumerate(tqdm(html_files, desc="Processing HTML files")):
+        if debug_mode:
+            files_iter = html_files
+        else:
+            files_iter = tqdm(html_files, desc="Processing HTML files")
+        for index, html_file_path in enumerate(files_iter):
             with open(html_file_path, encoding='utf-8') as file:
                 html_content = BeautifulSoup(file.read(), "html.parser")
             # throw error if no content
@@ -82,7 +98,8 @@ class WebDataPreProccessor(PreProcessDataInterface):
                 raise ValueError(f"Could not parse HTML file: {html_file_path}")
             document_id = html_file_path.split("/")[-1].replace(".html", "").replace("pages\\", "")
             page_title = html_content.title.contents[0]
-            
+            debug_print(f"######### document_id:{document_id} #########")
+            debug_print(f"Title:\n {reverse_lines(page_title)}")
             # Get main content section
             main_content = html_content.main
             
@@ -103,6 +120,9 @@ class WebDataPreProccessor(PreProcessDataInterface):
                 # Restore header marker and split into title and body
                 section_content = "#" + section_content
                 section_title, section_body = section_content.split("\n", 1)
+                debug_print(f"### section {i} ###")
+                debug_print(f"section_title:\n {reverse_lines(section_title)}")
+                debug_print(f"section_body:\n {reverse_lines(section_body)}")
                 
                 res.append(WebTextSection(document_id, str(i), page_title + section_title + section_body))
 

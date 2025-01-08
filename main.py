@@ -2,13 +2,14 @@ import csv
 from components.query import Query
 from components.pre_process_data_interface import PreProcessDataInterface, WebDataPreProccessor
 from components.index_data_interface import IndexerInferface, Bm25Indexer
-from components.llm_answer_retriever_interface import LlmAnswerRetrieverInterface, GeminiFreeTierAnswerRetriever
+from components.LlmAnswerRetriever.llm_answer_retriever_interface import LlmAnswerRetrieverInterface, EmptyAnswerRetrieverInterface
+from components.LlmAnswerRetriever.GeminiFreeTierAnswerRetriever import GeminiFreeTierAnswerRetriever
 from components.rag_results import RagResults
 
 use_small_data = False
 small_suffix = "_small" if use_small_data else ""
 eval_set_name = f'eval-set{small_suffix}.csv'
-web_database_name = f'kolzchut'
+web_database_name = f'kolzchut{small_suffix}'
 
 class Rag:
     def __init__(self, pre_proccessor: PreProcessDataInterface, index_data_impl: IndexerInferface, get_final_answers_impl: LlmAnswerRetrieverInterface):
@@ -19,7 +20,7 @@ class Rag:
     def answer_queries(self, queries: list[Query]):
         web_text_units = self.pre_proccessor.load_or_process_data()
         self.index_data_impl.index_data(web_text_units)
-        self.index_data_impl.retrieve_answer_source(queries, k=100)
+        self.index_data_impl.retrieve_answer_source(queries, k=20)
         self.final_answers_retrievers.retrieve_final_answers(queries)
 
 def parse_queries_csv(file_path):
@@ -36,16 +37,16 @@ def run_rag():
     queries = queries[:15]
     pre_proccessor = WebDataPreProccessor(web_database_name)
     index_data_impl = Bm25Indexer()
-    get_final_answers_impl = GeminiFreeTierAnswerRetriever()
+    get_final_answers_retriever = EmptyAnswerRetrieverInterface()
 
-    rag = Rag(pre_proccessor, index_data_impl, get_final_answers_impl)
+    rag = Rag(pre_proccessor, index_data_impl, get_final_answers_retriever)
     rag.answer_queries(queries)
 
     results = RagResults(
         queries=queries,
         pre_proccessor_name=pre_proccessor.__class__.__name__,
         index_data_impl_name=index_data_impl.__class__.__name__,
-        get_final_answers_impl_name=get_final_answers_impl.__class__.__name__
+        get_final_answers_impl_name=get_final_answers_retriever.__class__.__name__
     )
     results.save_to_file('test_results/rag_results.json')
 
