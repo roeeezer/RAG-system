@@ -222,16 +222,26 @@ class WebDataPreProccessorLemmatization(PreProcessDataInterface):
         ]
         return result
 
+
+
     def _preprocess_with_trankit(self, texts: list[str]) -> list[str]:
-        """Use Trankit to tokenize and lemmatize a batch of text sections."""
+        """Use Trankit to tokenize and lemmatize a batch of text sections with punctuation splitting."""
         if not texts:
             return []
 
+        # Preprocess: split punctuation (e.g., "200(ג)" to "200 , ג")
+        preprocessed_texts = []
+        for text in texts:
+            # Add spaces around punctuation and special characters
+            text = re.sub(r"([^\w\s])", r" \1 ", text)  # Add spaces around non-word characters
+            text = re.sub(r"\s+", " ", text)  # Normalize multiple spaces to a single space
+            preprocessed_texts.append(text.strip())
+
         # Convert each text section into a list of sentences (list of lists of strings)
-        batch_input = [[sentence for sentence in text.split(". ") if sentence.strip()] for text in texts]
+        batch_input = [[sentence for sentence in text.split(" ") if sentence.strip()] for text in preprocessed_texts]
         batch_input = [section for section in batch_input if section]
 
-        # **Check for empty lists in batch_input**
+        # Check for empty lists in batch_input
         empty_indices = [i for i, section in enumerate(batch_input) if not section]
         if empty_indices:
             raise ValueError(f"Empty section detected at indices: {empty_indices}. Please check your input data.")
@@ -243,11 +253,15 @@ class WebDataPreProccessorLemmatization(PreProcessDataInterface):
         lemmatized_texts = []
         for section_sentences in lemmatize_result["sentences"]:
             lemmatized_text = " ".join(
-                token.get('lemma', token['text']) for token in section_sentences["tokens"]
+                token['text'] if token.get('lemma', "_") == "_" else token['lemma']
+                for token in section_sentences["tokens"]
             )
             lemmatized_texts.append(lemmatized_text)
 
+
+
         return lemmatized_texts
+
 
 
 
