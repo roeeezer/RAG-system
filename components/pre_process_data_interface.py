@@ -9,13 +9,19 @@ import pickle
 import time
 from typing import List
 import os
-import trankit  # Add Trankit import
+import trankit
 
 debug_mode = False
 
 def debug_print(*args, **kwargs):
     if debug_mode:
         print(*args, **kwargs)
+
+def reverse_lines(paragraph):
+   # Split to lines, reverse each line's chars, rejoin with newlines
+   lines = paragraph.split('\n')
+   reversed_lines = [''.join(reversed(line)) for line in lines]
+   return '\n'.join(reversed_lines)
 
 class CustomConverter(MarkdownConverter):
     # don't format markdown links, return only their text, not their URL
@@ -27,12 +33,6 @@ class CustomConverter(MarkdownConverter):
     def convert_table(self, element, text, convert_as_inline):
         """Skip table formatting, replace with placeholder"""
         return "[טבלה]"
-
-def reverse_lines(paragraph):
-   # Split to lines, reverse each line's chars, rejoin with newlines
-   lines = paragraph.split('\n')
-   reversed_lines = [''.join(reversed(line)) for line in lines]
-   return '\n'.join(reversed_lines)
 
 class PreProcessDataInterface(ABC):
     def __init__(self, data_path: str):
@@ -81,8 +81,44 @@ class PreProcessDataInterface(ABC):
         """Shared method to load processed data from pickle file"""
         with open(self.cache_file, 'rb') as f:
             return pickle.load(f)
-
+    
 class WebDataPreProccessor(PreProcessDataInterface):
+        
+    def pre_proccess_data(self) -> list[WebTextUnit]:
+        res = []
+        html_files = glob.glob(f"{self.data_path}/pages/*.html")
+        for index, html_file_path in enumerate(tqdm(html_files, desc="Processing HTML files")):
+            with open(html_file_path, encoding='utf-8') as file:
+                html_content = BeautifulSoup(file.read(), "html.parser")
+            document_id = html_file_path.split("/")[-1].replace(".html", "").replace("pages\\", "")
+            page_title = html_content.title.contents[0]
+            
+            # Get main content section
+            main_content = html_content.main
+            
+            # Convert HTML to Markdown format
+            markdown_content = CustomConverter(heading_style="ATX", bullets="*").convert_soup(main_content)
+            
+            # Clean up excessive newlines
+            markdown_content = re.sub(r"\n\n+", "\n\n", markdown_content)
+            
+            # Split content into sections based on headers
+            content_sections = markdown_content.split("\n#")
+            
+            # Process each section
+            for i, section_content in enumerate(content_sections):
+                if not section_content.strip():
+                    continue  # Skip empty sections
+                    
+                # Restore header marker and split into title and body
+                section_content = "#" + section_content
+                section_title, section_body = section_content.split("\n", 1)
+                
+                res.append(WebTextSection(document_id, str(i), page_title + section_title + section_body, None))
+        return res
+    
+
+class WebDataPreProccessorLemmatization(PreProcessDataInterface):
     def __init__(self, data_path: str):
         super().__init__(data_path)
         # Initialize Trankit pipeline
@@ -146,3 +182,4 @@ class WebDataPreProccessor(PreProcessDataInterface):
         processed = self.pipeline(text)
         lemmatized_tokens = [word['lemma'] for word in processed['tokens'] if word['upos'] not in ['PUNCT', 'DET', 'AUX']]
         return ' '.join(lemmatized_tokens)
+    
