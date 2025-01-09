@@ -10,6 +10,10 @@ class WebTextUnit(ABC):
     def get_content(self) -> str:
         pass
 
+    @abstractmethod
+    def get_lemmatised_content(self) -> str:
+        pass
+
 @dataclass
 class WebTextSection:
     doc_id: str

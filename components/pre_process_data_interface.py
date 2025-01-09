@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from bs4 import BeautifulSoup, Tag
 import glob
 import re
+import torch
 from markdownify import MarkdownConverter
 from components.web_text_unit import WebTextUnit, WebTextSection
 from tqdm import tqdm
@@ -10,6 +11,7 @@ import time
 from typing import List
 import os
 import trankit
+from tqdm import tqdm
 
 debug_mode = False
 
@@ -83,7 +85,6 @@ class PreProcessDataInterface(ABC):
             return pickle.load(f)
     
 class WebDataPreProccessor(PreProcessDataInterface):
-        
     def pre_proccess_data(self) -> list[WebTextUnit]:
         res = []
         html_files = glob.glob(f"{self.data_path}/pages/*.html")
@@ -122,15 +123,36 @@ class WebDataPreProccessorLemmatization(PreProcessDataInterface):
     def __init__(self, data_path: str):
         super().__init__(data_path)
         # Initialize Trankit pipeline
-        self.pipeline = trankit.Pipeline(lang='hebrew')
+        self.pipeline = trankit.Pipeline(lang='hebrew', gpu=True)
+        # PyTorch version
+        print(f"PyTorch version: {torch.__version__}")
+
+        # Check if CUDA is available (GPU support)
+        print(f"CUDA available: {torch.cuda.is_available()}")
+
+        # Check CUDA version PyTorch was built with
+        print(f"Built with CUDA version: {torch.version.cuda}")
+
+        # If GPU is available, print GPU device details
+        if torch.cuda.is_available():
+            print(f"GPU Device Name: {torch.cuda.get_device_name(0)}")
+            print(f"Number of GPUs: {torch.cuda.device_count()}")
+        else:
+            print("No GPU detected, using CPU.")
+
+
 
     def pre_proccess_data(self) -> list[WebTextUnit]:
+        print("Preprocessing data with Trankit...")
         res = []
         html_files = glob.glob(f"{self.data_path}/pages/*.html")
+        if len(html_files) == 0:
+            raise FileNotFoundError(f"No HTML files found in {self.data_path}/pages")
         if debug_mode:
             files_iter = html_files
         else:
             files_iter = tqdm(html_files, desc="Processing HTML files")
+
 
         for index, html_file_path in enumerate(files_iter):
             with open(html_file_path, encoding='utf-8') as file:
@@ -157,7 +179,7 @@ class WebDataPreProccessorLemmatization(PreProcessDataInterface):
             content_sections = markdown_content.split("\n#")
             
             # Process each section
-            for i, section_content in enumerate(content_sections):
+            for i, section_content in enumerate(tqdm(content_sections)):
                 if not section_content.strip():
                     continue  # Skip empty sections
 
@@ -171,15 +193,25 @@ class WebDataPreProccessorLemmatization(PreProcessDataInterface):
                 debug_print(f"section_body:\n {reverse_lines(section_body)}")
 
                 # Apply Trankit preprocessing
-                processed_text = self._preprocess_with_trankit(section_body)
+                lemmatized_text = self._preprocess_with_trankit(section_body)
 
-                res.append(WebTextSection(document_id, str(i), page_title + section_title + section_body, processed_text))
+                res.append(WebTextSection(document_id, str(i), page_title + section_title + section_body, lemmatized_text))
 
         return res
 
     def _preprocess_with_trankit(self, text: str) -> str:
         """Use Trankit to tokenize and lemmatize the input text"""
-        processed = self.pipeline(text)
-        lemmatized_tokens = [word['lemma'] for word in processed['tokens'] if word['upos'] not in ['PUNCT', 'DET', 'AUX']]
-        return ' '.join(lemmatized_tokens)
+        if not text:
+            return text
+        
+        # Perform lemmatization using Trankit
+        lemmatize_tokens = self.pipeline.lemmatize(text)
+
+        # Construct lemmatized text by iterating over tokens
+        lemmatized_text = " ".join(
+            token.get('lemma', token['text']) for sentence in lemmatize_tokens['sentences'] for token in sentence['tokens']
+        )
+    
+        return lemmatized_text
+
     

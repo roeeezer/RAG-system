@@ -1,15 +1,20 @@
 import csv
 from components.query import Query
-from components.pre_process_data_interface import PreProcessDataInterface, WebDataPreProccessor
+from components.pre_process_data_interface import PreProcessDataInterface, WebDataPreProccessor, WebDataPreProccessorLemmatization
 from components.index_data_interface import IndexerInferface, Bm25Indexer
 from components.LlmAnswerRetriever.llm_answer_retriever_interface import LlmAnswerRetrieverInterface, EmptyAnswerRetrieverInterface
 from components.LlmAnswerRetriever.GeminiFreeTierAnswerRetriever import GeminiFreeTierAnswerRetriever
 from components.rag_results import RagResults
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+os.environ["OMP_NUM_THREADS"] = "1"
+
+
 
 use_small_data = False
 small_suffix = "_small" if use_small_data else ""
 eval_set_name = f'eval-set{small_suffix}.csv'
-web_database_name = f'kolzchut{small_suffix}'
+web_database_name = f'conda kolzchut'
 
 class Rag:
     def __init__(self, pre_proccessor: PreProcessDataInterface, index_data_impl: IndexerInferface, get_final_answers_impl: LlmAnswerRetrieverInterface):
@@ -35,7 +40,7 @@ def parse_queries_csv(file_path):
 def run_rag():
     queries = parse_queries_csv(eval_set_name)
     queries = queries[:15]
-    pre_proccessor = WebDataPreProccessor(web_database_name)
+    pre_proccessor = WebDataPreProccessorLemmatization(web_database_name)
     index_data_impl = Bm25Indexer()
     get_final_answers_retriever = EmptyAnswerRetrieverInterface()
 

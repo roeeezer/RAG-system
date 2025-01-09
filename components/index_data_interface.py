@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import bm25s
 from components.web_text_unit import WebTextUnit
 from components.query import Query
+import trankit
 
 class IndexerInferface(ABC):
     @abstractmethod
@@ -19,11 +20,12 @@ class Bm25Indexer(IndexerInferface):
         self.corpus_tokens = None
         self.dictionary = None
         self.index = None
+        self.pipeline = trankit.Pipeline("hebrew")
 
     def index_data(self, web_text_units : list[WebTextUnit]):
         self.web_text_units = web_text_units
         # Prepare the corpus for BM25
-        corpus = [u.get_content() for u in web_text_units]
+        corpus = [u.get_lemmatised_content() for u in web_text_units]
 
         # Initialize BM25 index
         self.index = bm25s.BM25()
@@ -37,9 +39,10 @@ class Bm25Indexer(IndexerInferface):
         return self.index
 
     def bm25_retrieve(self, query, k):
-        # Tokenize the query and map tokens using the corpus dictionary
-        q_tokens = query.split()  # Basic tokenization
-        ids = [self.dictionary[t] for t in q_tokens if t in self.dictionary]  # Filter OOV words
+        # lemmatize the query and map tokens using the corpus dictionary
+        lemmatized_query = self._preprocess_with_trankit(query).split()
+
+        ids = [self.dictionary.get(token) for token in lemmatized_query]
 
         if not ids:
             print(f"No valid tokens found for query: {query}")
@@ -59,3 +62,18 @@ class Bm25Indexer(IndexerInferface):
     def retrieve_answer_source(self, queries: list[Query], k=1) -> list[WebTextUnit]:
         for query in queries:
             query.answer_sources = self.bm25_retrieve(query.query, k)
+
+    def _preprocess_with_trankit(self, text: str) -> str:
+        """Use Trankit to tokenize and lemmatize the input text"""
+        if not text:
+            return text
+        
+        # Perform lemmatization using Trankit
+        lemmatize_tokens = self.pipeline.lemmatize(text)
+
+        # Construct lemmatized text by iterating over tokens
+        lemmatized_text = " ".join(
+            token.get('lemma', token['text']) for sentence in lemmatize_tokens['sentences'] for token in sentence['tokens']
+        )
+    
+        return lemmatized_text
