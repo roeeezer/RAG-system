@@ -4,8 +4,6 @@ from tqdm import tqdm
 from components.LlmAnswerRetriever.llm_answer_retriever_interface import LlmAnswerRetrieverInterface
 from components.LlmAnswerRetriever.gemini import Gemini
 
-        
-
 class GeminiFreeTierAnswerRetriever(LlmAnswerRetrieverInterface):
     def __init__(self, gemini: Gemini):
         self.gemini = gemini

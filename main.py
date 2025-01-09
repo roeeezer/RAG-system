@@ -9,6 +9,7 @@ from components.IndexOptimizer.indexing_text_optimizer_interface import  NoneInd
 from components.rag import Rag
 from components.IndexOptimizer.word_filtering_indexing_optimizer import WordFilteringIndexingOptimizer
 from components.LlmAnswerRetriever.gemini import Gemini
+from components.IndexOptimizer.hyde_indexing_optimizer import HydeIndexingOptimizer
 
 use_small_data = False
 small_suffix = "_small" if use_small_data else ""
@@ -29,9 +30,9 @@ def run_rag():
     queries = queries[:15]
     gemini = Gemini()
     pre_proccessor = WebDataPreProccessor(web_database_name)
-    index_optimizers = [NoneIndexOptimizer()]
+    index_optimizers = [HydeIndexingOptimizer(gemini)]
     index_data_impl = Bm25Indexer()
-    get_final_answers_retriever = EmptyAnswerRetrieverInterface(gemini)
+    get_final_answers_retriever = EmptyAnswerRetrieverInterface()
 
     rag = Rag(pre_proccessor, 
               index_data_impl, 
