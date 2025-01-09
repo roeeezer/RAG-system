@@ -1,6 +1,6 @@
 import csv
 from components.query import Query
-from components.pre_process_data_interface import WebDataPreProccessor
+from components.pre_process_data_interface import WebDataPreProccessor, WebDataPreProccessorLemmatization
 from components.index_data_interface import Bm25Indexer
 from components.LlmAnswerRetriever.llm_answer_retriever_interface import EmptyAnswerRetrieverInterface
 from components.LlmAnswerRetriever.GeminiFreeTierAnswerRetriever import GeminiFreeTierAnswerRetriever
@@ -29,7 +29,7 @@ def run_rag():
     queries = parse_queries_csv(eval_set_name)
     queries = queries[:15]
     gemini = Gemini()
-    pre_proccessor = WebDataPreProccessor(web_database_name)
+    pre_proccessor = WebDataPreProccessorLemmatization(web_database_name)
     index_optimizers = [HydeIndexingOptimizer(gemini), Lema()]
     index_data_impl = Bm25Indexer()
     get_final_answers_retriever = EmptyAnswerRetrieverInterface()

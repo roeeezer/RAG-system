@@ -20,8 +20,9 @@ class Rag:
     def answer_queries(self, queries: list[Query]):
         print("Loading or processing data")
         web_text_units = self.pre_proccessor.load_or_process_data()
-        print("Optimizing queries and text units")
+        print("Optimizing queries")
         self.optimize_queries(queries)
+        print("Optimizing text units")
         self.optimize_text_units(web_text_units)
         print("Indexing data")
         self.index_data_impl.index_data(web_text_units)
