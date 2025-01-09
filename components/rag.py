@@ -16,14 +16,15 @@ class Rag:
         self.index_data_impl = index_data_impl
         self.final_answers_retrievers = get_final_answers_impl
         self.indexing_optimizers = index_optimizers
+        self.batch_size = 10
 
     def answer_queries(self, queries: list[Query]):
         print("Loading or processing data")
         web_text_units = self.pre_proccessor.load_or_process_data()
         print("Optimizing queries")
         self.optimize_queries(queries)
-        # print("Optimizing text units")
-        # self.optimize_text_units(web_text_units)
+        print("Optimizing text units")
+        self.optimize_text_units(web_text_units)
         print("Indexing data")
         self.index_data_impl.index_data(web_text_units)
         print("Retrieving answers")
@@ -32,15 +33,22 @@ class Rag:
         self.final_answers_retrievers.retrieve_final_answers(queries)
 
     def optimize_queries(self, queries: list[Query]) -> None:
-        for query in tqdm(queries):
-            optimized_query = query.query
+        batched_queries = [
+            [queries[i].query for i in range(start, min(start + self.batch_size, len(queries)))] 
+            for start in range(0, len(queries), self.batch_size)]
+        for batch in tqdm(batched_queries):
             for optimizer in self.indexing_optimizers:
-                optimized_query = optimizer.optimize_query(optimized_query)
-            query.indexing_optimized_query = optimized_query
+                optimized_queries = optimizer.optimize_queries(batch)
+            for i, query in enumerate(batch):
+                queries[i].indexing_optimized_query = optimized_queries[i]
+            
     
     def optimize_text_units(self, web_text_units: list[WebTextUnit]) -> None:
-        for unit in tqdm(web_text_units):
-            optimized_text = unit.get_content()
-            for optimizer in self.indexing_optimizers:
-                optimized_text = optimizer.optimize_document(optimized_text)
-            unit.indexing_optimized_content = optimized_text
+        batched_units = [
+            [web_text_units[i].get_content() for i in range(start, min(start + self.batch_size, len(web_text_units)))] 
+            for start in range(0, len(web_text_units), self.batch_size)
+        ]
+        for batch in tqdm(batched_units):
+            optimized_texts = self.op
+            for i, unit in enumerate(batch):
+                web_text_units[i].indexing_optimized_content = optimized_texts[i]

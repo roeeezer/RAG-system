@@ -1,4 +1,5 @@
 from components.IndexOptimizer.indexing_text_optimizer_interface import IndexingTextOptimizerInterface
+from typing import List
 
 words_to_filter_by_category = [
     ('ה', 'article'),
@@ -57,11 +58,17 @@ class WordFilteringIndexingOptimizer(IndexingTextOptimizerInterface):
     def __init__(self):
         self.words_to_filter = [word for word, _ in words_to_filter_by_category]
 
-    def optimize_query(self, text: str) -> str:
-        return self.optimize_text(text)
+    def optimize_query(self, lst_text: List[str]) -> List[str]:
+        res = []
+        for text in lst_text:
+            res.append(self.optimize_text(text))
+        return res
 
-    def optimize_document(self, text: str) -> str:
-        return self.optimize_text(text)
+    def optimize_document(self, lst_text: List[str]) -> List[str]:
+        res = []
+        for text in lst_text:
+            res.append(self.optimize_text(text))
+        return res
 
     def optimize_text(self, text: str) -> str:
         text = text.split()
