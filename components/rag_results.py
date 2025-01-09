@@ -3,19 +3,29 @@ import os
 from components.query import Query
 
 class RagResults:
-    def __init__(self, queries, pre_proccessor_name, index_data_impl_name, get_final_answers_impl_name):
-        self.version = "1.0.0"
+    def __init__(self, queries: list[Query], pre_proccessor_name, index_data_impl_name, get_final_answers_impl_name):
+        self.version = "1.0.1"
         self.queries = queries
+        self.wrong_retrieved_queries = self.get_wrong_retrieved_queries(queries)
         self.pre_proccessor_name = pre_proccessor_name
         self.index_data_impl_name = index_data_impl_name
         self.get_final_answers_impl_name = get_final_answers_impl_name
         self.recall = self.recall_at_k(queries, k=20)
-        self.mmr = self.mrr(queries, k=20)  
+        self.mmr = self.mrr(queries, k=20) 
+
+    def get_wrong_retrieved_queries(self, queries : list[Query]):
+        res = []
+        for query in queries:
+            retrived_doc_ids = [answer_source.get_doc_id() for answer_source in query.answer_sources]
+            if query.gold_doc_id not in retrived_doc_ids:
+                res.append(query)
+        return res
 
     def to_dict(self):
         return {
             "version": self.version,
             "queries": [self.query_to_dict(query) for query in self.queries],
+            "wrong_retrieved_queries": [self.query_to_dict(query) for query in self.wrong_retrieved_queries],
             "pre_proccessor_name": self.pre_proccessor_name,
             "index_data_impl_name": self.index_data_impl_name,
             "get_final_answers_impl_name": self.get_final_answers_impl_name,

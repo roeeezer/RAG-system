@@ -7,6 +7,10 @@ class WebTextUnit(ABC):
         pass
 
     @abstractmethod
+    def get_doc_id(self) -> str:
+        pass
+
+    @abstractmethod
     def get_content(self) -> str:
         pass
 
@@ -18,6 +22,9 @@ class WebTextSection:
 
     def get_id(self) -> str:
         return self.doc_id + "_" + self.section_id
+
+    def get_doc_id(self) -> str:
+        return self.doc_id 
 
     def get_content(self) -> str:
         return self.content
