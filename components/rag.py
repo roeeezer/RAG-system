@@ -4,6 +4,7 @@ from components.index_data_interface import IndexerInferface
 from components.LlmAnswerRetriever.llm_answer_retriever_interface import LlmAnswerRetrieverInterface
 from components.IndexOptimizer.indexing_text_optimizer_interface import IndexingTextOptimizerInterface
 from components.web_text_unit import WebTextUnit
+from tqdm import tqdm
 
 class Rag:
     def __init__(self, 
@@ -17,15 +18,20 @@ class Rag:
         self.indexing_optimizers = index_optimizers
 
     def answer_queries(self, queries: list[Query]):
+        print("Loading or processing data")
         web_text_units = self.pre_proccessor.load_or_process_data()
+        print("Optimizing queries and text units")
         self.optimize_queries(queries)
         self.optimize_text_units(web_text_units)
+        print("Indexing data")
         self.index_data_impl.index_data(web_text_units)
+        print("Retrieving answers")
         self.index_data_impl.retrieve_answer_source(queries, k=20)
+        print("Retrieving final answers")
         self.final_answers_retrievers.retrieve_final_answers(queries)
 
     def optimize_queries(self, queries: list[Query]) -> None:
-        for query in queries:
+        for query in tqdm(queries):
             optimized_query = query.query
             for optimizer in self.indexing_optimizers:
                 optimized_query = optimizer.optimize_query(optimized_query)
