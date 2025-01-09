@@ -38,7 +38,7 @@ class Rag:
             query.indexing_optimized_query = optimized_query
     
     def optimize_text_units(self, web_text_units: list[WebTextUnit]) -> None:
-        for unit in web_text_units:
+        for unit in tqdm(web_text_units):
             optimized_text = unit.get_content()
             for optimizer in self.indexing_optimizers:
                 optimized_text = optimizer.optimize_document(optimized_text)
