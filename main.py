@@ -7,6 +7,7 @@ from components.LlmAnswerRetriever.GeminiFreeTierAnswerRetriever import GeminiFr
 from components.rag_results import RagResults
 from components.IndexOptimizer.indexing_text_optimizer_interface import  NoneIndexOptimizer
 from components.rag import Rag
+from components.IndexOptimizer.word_filtering_indexing_optimizer import WordFilteringIndexingOptimizer
 
 use_small_data = False
 small_suffix = "_small" if use_small_data else ""
