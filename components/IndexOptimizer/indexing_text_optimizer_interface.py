@@ -1,7 +1,4 @@
 from abc import ABC, abstractmethod
-from query import Query
-from typing import List
-from web_text_unit import WebTextUnit
 import trankit
 import torch
 
@@ -32,7 +29,7 @@ class LemmatizerIndexOptimizer(IndexingTextOptimizerInterface):
             print("Using CPU to lemmatize")
 
         
-    def optimize_text(self, text: str) -> str:
+    def optimize_document(self, text: str) -> str:
         if not text:
             return text
         
@@ -45,5 +42,8 @@ class LemmatizerIndexOptimizer(IndexingTextOptimizerInterface):
         )
     
         return lemmatized_text
+    
+    def optimize_query(self, text: str) -> str:
+        return self.optimize_document(text)
 
 
