@@ -7,6 +7,9 @@ from components.LlmAnswerRetriever.GeminiFreeTierAnswerRetriever import GeminiFr
 from components.rag_results import RagResults
 from components.IndexOptimizer.indexing_text_optimizer_interface import  LemmatizerIndexOptimizer as Lema
 from components.rag import Rag
+from components.IndexOptimizer.word_filtering_indexing_optimizer import WordFilteringIndexingOptimizer
+from components.LlmAnswerRetriever.gemini import Gemini
+from components.IndexOptimizer.hyde_indexing_optimizer import HydeIndexingOptimizer
 
 use_small_data = False
 small_suffix = "_small" if use_small_data else ""
@@ -25,8 +28,9 @@ def parse_queries_csv(file_path) -> list[Query]:
 def run_rag():
     queries = parse_queries_csv(eval_set_name)
     queries = queries[:15]
+    gemini = Gemini()
     pre_proccessor = WebDataPreProccessor(web_database_name)
-    index_optimizers = [Lema()]
+    index_optimizers = [HydeIndexingOptimizer(gemini), Lema()]
     index_data_impl = Bm25Indexer()
     get_final_answers_retriever = EmptyAnswerRetrieverInterface()
 

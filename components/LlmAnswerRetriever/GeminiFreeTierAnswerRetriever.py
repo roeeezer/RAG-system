@@ -1,35 +1,15 @@
 import os
-import google.generativeai as genai
-from components.web_text_unit import WebTextSection
 from components.query import Query
-import time
 from tqdm import tqdm
 from components.LlmAnswerRetriever.llm_answer_retriever_interface import LlmAnswerRetrieverInterface
+from components.LlmAnswerRetriever.gemini import Gemini
 
 class GeminiFreeTierAnswerRetriever(LlmAnswerRetrieverInterface):
-    def get_api_key(self):
-        current_directory_path = os.getcwd()
-        file_path = os.path.join(current_directory_path, "untracked", "gemini_api_key.txt")
-        api_key = open(file_path, encoding='utf-8').read()
-        return api_key
+    def __init__(self, gemini: Gemini):
+        self.gemini = gemini
 
     def get_llm_output(self, llm_input):
-        api_key = self.get_api_key()
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-1.5-flash")
-
-        retries = 2
-        for attempt in range(retries + 1):
-            try:
-                response = model.generate_content(llm_input)
-                return response.text
-            except Exception as e:
-                if attempt < retries:
-                    print(f"Request failed: {e}. Retrying in 70 seconds...")
-                    time.sleep(70)
-                else:
-                    print(f"Request failed after {retries + 1} attempts: {e}")
-                    raise
+        return self.gemini.get_llm_output(llm_input)
     
     def get_llm_input(self, query, answer_source):
         script_directory = os.path.dirname(__file__)

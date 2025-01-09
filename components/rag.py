@@ -10,7 +10,7 @@ class Rag:
                  pre_proccessor: PreProcessDataInterface, 
                  index_data_impl: IndexerInferface, 
                  get_final_answers_impl: LlmAnswerRetrieverInterface,
-                 index_optimizers: IndexingTextOptimizerInterface):
+                 index_optimizers: list[IndexingTextOptimizerInterface]):
         self.pre_proccessor = pre_proccessor
         self.index_data_impl = index_data_impl
         self.final_answers_retrievers = get_final_answers_impl
@@ -28,12 +28,12 @@ class Rag:
         for query in queries:
             optimized_query = query.query
             for optimizer in self.indexing_optimizers:
-                optimized_query = optimizer.optimize_text(optimized_query)
+                optimized_query = optimizer.optimize_query(optimized_query)
             query.indexing_optimized_query = optimized_query
     
     def optimize_text_units(self, web_text_units: list[WebTextUnit]) -> None:
         for unit in web_text_units:
             optimized_text = unit.get_content()
             for optimizer in self.indexing_optimizers:
-                optimized_text = optimizer.optimize_text(optimized_text)
+                optimized_text = optimizer.optimize_document(optimized_text)
             unit.indexing_optimized_content = optimized_text
