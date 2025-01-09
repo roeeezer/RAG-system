@@ -140,8 +140,6 @@ class WebDataPreProccessorLemmatization(PreProcessDataInterface):
         else:
             print("No GPU detected, using CPU.")
 
-
-
     def pre_proccess_data(self) -> list[WebTextUnit]:
         print("Preprocessing data with Trankit...")
         res = []
@@ -152,7 +150,6 @@ class WebDataPreProccessorLemmatization(PreProcessDataInterface):
             files_iter = html_files
         else:
             files_iter = tqdm(html_files, desc="Processing HTML files")
-
 
         for index, html_file_path in enumerate(files_iter):
             with open(html_file_path, encoding='utf-8') as file:
@@ -168,50 +165,93 @@ class WebDataPreProccessorLemmatization(PreProcessDataInterface):
 
             # Get main content section
             main_content = html_content.main
-            
+
             # Convert HTML to Markdown format
             markdown_content = CustomConverter(heading_style="ATX", bullets="*").convert_soup(main_content)
-            
+
             # Clean up excessive newlines
             markdown_content = re.sub(r"\n\n+", "\n\n", markdown_content)
-            
+
             # Split content into sections based on headers
             content_sections = markdown_content.split("\n#")
-            
-            # Process each section
-            for i, section_content in enumerate(tqdm(content_sections)):
-                if not section_content.strip():
-                    continue  # Skip empty sections
 
-                # Restore header marker and split into title and body
-                section_content = section_content
-                section_title, section_body = section_content.split("\n", 1)
-                if "גורמים מסייעים" in section_title:
-                    continue
-                debug_print(f"### section {i} ###")
-                debug_print(f"section_title:\n {reverse_lines(section_title)}")
-                debug_print(f"section_body:\n {reverse_lines(section_body)}")
-
-                # Apply Trankit preprocessing
-                lemmatized_text = self._preprocess_with_trankit(section_body)
-
-                res.append(WebTextSection(document_id, str(i), page_title + section_title + section_body, lemmatized_text))
+            # **Batch processing: Split sections into batches for Trankit**
+            batch_size = 10  # You can adjust this based on available memory and performance
+            for i in range(0, len(content_sections), batch_size):
+                batch = content_sections[i:i + batch_size]
+                res.extend(self._process_section_batch(document_id, page_title, batch, i))
 
         return res
 
-    def _preprocess_with_trankit(self, text: str) -> str:
-        """Use Trankit to tokenize and lemmatize the input text"""
-        if not text:
-            return text
-        
-        # Perform lemmatization using Trankit
-        lemmatize_tokens = self.pipeline.lemmatize(text)
+    def _process_section_batch(self, document_id: str, page_title: str, sections: list[str], start_index: int) -> list[WebTextUnit]:
+        """Processes a batch of text sections"""
+        valid_sections = []
+        for i, section_content in enumerate(sections):
+            if not section_content.strip():
+                continue  # Skip empty sections
 
-        # Construct lemmatized text by iterating over tokens
-        lemmatized_text = " ".join(
-            token.get('lemma', token['text']) for sentence in lemmatize_tokens['sentences'] for token in sentence['tokens']
-        )
-    
-        return lemmatized_text
+            # Restore header marker and split into title and body
+            section_content = section_content
+            try:
+                section_title, section_body = section_content.split("\n", 1)
+            except ValueError:
+                section_title, section_body = section_content, ""
+            
+            if "גורמים מסייעים" in section_title:
+                continue
+
+            debug_print(f"### section {start_index + i} ###")
+            debug_print(f"section_title:\n {reverse_lines(section_title)}")
+            debug_print(f"section_body:\n {reverse_lines(section_body)}")
+
+            valid_sections.append((section_title, section_body))
+
+        # **Batch lemmatization with Trankit**
+        section_texts = [section_body for _, section_body in valid_sections]
+        lemmatized_texts = self._preprocess_with_trankit(section_texts)
+
+        # Create WebTextSection objects
+        result = [
+            WebTextSection(
+                document_id,
+                str(start_index + i),
+                page_title + section_title + section_body,
+                lemmatized_text
+            )
+            for i, ((section_title, section_body), lemmatized_text) in enumerate(zip(valid_sections, lemmatized_texts))
+        ]
+        return result
+
+    def _preprocess_with_trankit(self, texts: list[str]) -> list[str]:
+        """Use Trankit to tokenize and lemmatize a batch of text sections."""
+        if not texts:
+            return []
+
+        # Convert each text section into a list of sentences (list of lists of strings)
+        batch_input = [[sentence for sentence in text.split(". ") if sentence.strip()] for text in texts]
+        batch_input = [section for section in batch_input if section]
+
+        # **Check for empty lists in batch_input**
+        empty_indices = [i for i, section in enumerate(batch_input) if not section]
+        if empty_indices:
+            raise ValueError(f"Empty section detected at indices: {empty_indices}. Please check your input data.")
+
+        # Perform lemmatization using Trankit (batch)
+        lemmatize_result = self.pipeline.lemmatize(batch_input)
+
+        # Process the lemmatization results
+        lemmatized_texts = []
+        for section_sentences in lemmatize_result["sentences"]:
+            lemmatized_text = " ".join(
+                token.get('lemma', token['text']) for token in section_sentences["tokens"]
+            )
+            lemmatized_texts.append(lemmatized_text)
+
+        return lemmatized_texts
+
+
+
+
+
 
     
