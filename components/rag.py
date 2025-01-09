@@ -10,7 +10,7 @@ class Rag:
                  pre_proccessor: PreProcessDataInterface, 
                  index_data_impl: IndexerInferface, 
                  get_final_answers_impl: LlmAnswerRetrieverInterface,
-                 index_optimizers: IndexingTextOptimizerInterface):
+                 index_optimizers: list[IndexingTextOptimizerInterface]):
         self.pre_proccessor = pre_proccessor
         self.index_data_impl = index_data_impl
         self.final_answers_retrievers = get_final_answers_impl

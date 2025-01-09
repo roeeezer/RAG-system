@@ -9,7 +9,7 @@ class RagResults:
         self.queries = queries
         self.wrong_retrieved_queries = self.get_wrong_retrieved_queries(queries)
         self.pre_proccessor_name = rag.pre_proccessor.__class__.__name__
-        self.index_optimizer_name = rag.indexing_optimizers.__class__.__name__
+        self.index_optimizer_names = [ optimizer.__class__.__name__ for optimizer in rag.indexing_optimizers]
         self.index_data_impl_name = rag.index_data_impl.__class__.__name__
         self.get_final_answers_impl_name = rag.final_answers_retrievers.__class__.__name__
         self.recall = self.recall_at_k(queries, k=20)
@@ -29,6 +29,7 @@ class RagResults:
             "queries": [self.query_to_dict(query) for query in self.queries],
             "wrong_retrieved_queries": [self.query_to_dict(query) for query in self.wrong_retrieved_queries],
             "pre_proccessor_name": self.pre_proccessor_name,
+            "index_optimizer_names": self.index_optimizer_names,
             "index_data_impl_name": self.index_data_impl_name,
             "get_final_answers_impl_name": self.get_final_answers_impl_name,
             "recall": self.recall,
@@ -39,6 +40,7 @@ class RagResults:
         return {
             "gold_doc_id": query.gold_doc_id,
             "query": query.query,
+            "indexing_optimized_query": query.indexing_optimized_query,
             "answer_source": [section.to_dict() for section in query.answer_sources] if query.answer_sources else None,
             "final_answer": query.final_answer
         }

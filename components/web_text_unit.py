@@ -42,5 +42,6 @@ class WebTextSection:
         return {
             "doc_id": self.doc_id,
             "section_id": self.section_id,
-            "text": self.content
+            "text": self.content,
+            "indexing_optimized_text": self.indexing_optimized_content
         }
