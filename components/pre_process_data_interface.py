@@ -9,6 +9,7 @@ import pickle
 import time
 from typing import List
 import os
+import trankit  # Add Trankit import
 
 debug_mode = False
 
@@ -80,8 +81,12 @@ class PreProcessDataInterface(ABC):
         """Shared method to load processed data from pickle file"""
         with open(self.cache_file, 'rb') as f:
             return pickle.load(f)
-    
+
 class WebDataPreProccessor(PreProcessDataInterface):
+    def __init__(self, data_path: str):
+        super().__init__(data_path)
+        # Initialize Trankit pipeline
+        self.pipeline = trankit.Pipeline(lang='hebrew')
 
     def pre_proccess_data(self) -> list[WebTextUnit]:
         res = []
@@ -90,16 +95,19 @@ class WebDataPreProccessor(PreProcessDataInterface):
             files_iter = html_files
         else:
             files_iter = tqdm(html_files, desc="Processing HTML files")
+
         for index, html_file_path in enumerate(files_iter):
             with open(html_file_path, encoding='utf-8') as file:
                 html_content = BeautifulSoup(file.read(), "html.parser")
             # throw error if no content
             if html_content is None:
                 raise ValueError(f"Could not parse HTML file: {html_file_path}")
+
             document_id = html_file_path.split("/")[-1].replace(".html", "").replace("pages\\", "")
             page_title = html_content.title.contents[0]
             debug_print(f"######### document_id:{document_id} #########")
             debug_print(f"Title:\n {reverse_lines(page_title)}")
+
             # Get main content section
             main_content = html_content.main
             
@@ -116,7 +124,7 @@ class WebDataPreProccessor(PreProcessDataInterface):
             for i, section_content in enumerate(content_sections):
                 if not section_content.strip():
                     continue  # Skip empty sections
-                    
+
                 # Restore header marker and split into title and body
                 section_content = section_content
                 section_title, section_body = section_content.split("\n", 1)
@@ -125,8 +133,16 @@ class WebDataPreProccessor(PreProcessDataInterface):
                 debug_print(f"### section {i} ###")
                 debug_print(f"section_title:\n {reverse_lines(section_title)}")
                 debug_print(f"section_body:\n {reverse_lines(section_body)}")
-                
-                res.append(WebTextSection(document_id, str(i), page_title + section_title + section_body))
 
+                # Apply Trankit preprocessing
+                processed_text = self._preprocess_with_trankit(section_body)
+
+                res.append(WebTextSection(document_id, str(i), page_title + section_title + section_body, processed_text))
 
         return res
+
+    def _preprocess_with_trankit(self, text: str) -> str:
+        """Use Trankit to tokenize and lemmatize the input text"""
+        processed = self.pipeline(text)
+        lemmatized_tokens = [word['lemma'] for word in processed['tokens'] if word['upos'] not in ['PUNCT', 'DET', 'AUX']]
+        return ' '.join(lemmatized_tokens)
