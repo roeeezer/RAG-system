@@ -25,7 +25,7 @@ class Bm25Indexer(IndexerInferface):
     def index_data(self, web_text_units : list[WebTextUnit]):
         self.web_text_units = web_text_units
         # Prepare the corpus for BM25
-        corpus = [u.get_lemmatised_content() for u in web_text_units]
+        corpus = [u.get_indexing_optimized_content() for u in web_text_units]
 
         # Initialize BM25 index
         self.index = bm25s.BM25()
@@ -61,7 +61,7 @@ class Bm25Indexer(IndexerInferface):
     
     def retrieve_answer_source(self, queries: list[Query], k=1) -> list[WebTextUnit]:
         for query in queries:
-            query.answer_sources = self.bm25_retrieve(query.query, k)
+            query.answer_sources = self.bm25_retrieve(query.indexing_optimized_query, k)
 
     def _preprocess_with_trankit(self, text: str) -> str:
         """Use Trankit to tokenize and lemmatize the input text"""

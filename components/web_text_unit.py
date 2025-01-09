@@ -7,11 +7,15 @@ class WebTextUnit(ABC):
         pass
 
     @abstractmethod
+    def get_doc_id(self) -> str:
+        pass
+
+    @abstractmethod
     def get_content(self) -> str:
         pass
 
     @abstractmethod
-    def get_lemmatised_content(self) -> str:
+    def get_indexing_optimized_content(self) -> str:
         pass
 
 @dataclass
@@ -19,16 +23,20 @@ class WebTextSection:
     doc_id: str
     section_id: str
     content: str
-    lemmatised_content: str
+    indexing_optimized_content: str
+
 
     def get_id(self) -> str:
         return self.doc_id + "_" + self.section_id
 
+    def get_doc_id(self) -> str:
+        return self.doc_id 
+
     def get_content(self) -> str:
         return self.content
-    
-    def get_lemmatised_content(self) -> str:
-        return self.lemmatised_content
+
+    def get_indexing_optimized_content(self) -> str:
+        return self.indexing_optimized_content    
 
     def to_dict(self):
         return {

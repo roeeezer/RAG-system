@@ -1,34 +1,19 @@
 import csv
 from components.query import Query
-from components.pre_process_data_interface import PreProcessDataInterface, WebDataPreProccessor, WebDataPreProccessorLemmatization
-from components.index_data_interface import IndexerInferface, Bm25Indexer
-from components.LlmAnswerRetriever.llm_answer_retriever_interface import LlmAnswerRetrieverInterface, EmptyAnswerRetrieverInterface
+from components.pre_process_data_interface import WebDataPreProccessor
+from components.index_data_interface import Bm25Indexer
+from components.LlmAnswerRetriever.llm_answer_retriever_interface import EmptyAnswerRetrieverInterface
 from components.LlmAnswerRetriever.GeminiFreeTierAnswerRetriever import GeminiFreeTierAnswerRetriever
 from components.rag_results import RagResults
-import os
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
-os.environ["OMP_NUM_THREADS"] = "1"
-
-
+from components.IndexOptimizer.indexing_text_optimizer_interface import  NoneIndexOptimizer
+from components.rag import Rag
 
 use_small_data = False
 small_suffix = "_small" if use_small_data else ""
 eval_set_name = f'eval-set{small_suffix}.csv'
-web_database_name = f'conda kolzchut'
+web_database_name = f'kolzchut{small_suffix}'
 
-class Rag:
-    def __init__(self, pre_proccessor: PreProcessDataInterface, index_data_impl: IndexerInferface, get_final_answers_impl: LlmAnswerRetrieverInterface):
-        self.pre_proccessor = pre_proccessor
-        self.index_data_impl = index_data_impl
-        self.final_answers_retrievers = get_final_answers_impl
-
-    def answer_queries(self, queries: list[Query]):
-        web_text_units = self.pre_proccessor.load_or_process_data()
-        self.index_data_impl.index_data(web_text_units)
-        self.index_data_impl.retrieve_answer_source(queries, k=20)
-        self.final_answers_retrievers.retrieve_final_answers(queries)
-
-def parse_queries_csv(file_path):
+def parse_queries_csv(file_path) -> list[Query]:
     queries = []
     with open(file_path, newline='', encoding='utf-8') as csvfile:
         reader = csv.reader(csvfile)
@@ -40,19 +25,18 @@ def parse_queries_csv(file_path):
 def run_rag():
     queries = parse_queries_csv(eval_set_name)
     queries = queries[:15]
-    pre_proccessor = WebDataPreProccessorLemmatization(web_database_name)
+    pre_proccessor = WebDataPreProccessor(web_database_name)
+    index_optimizers = [NoneIndexOptimizer()]
     index_data_impl = Bm25Indexer()
     get_final_answers_retriever = EmptyAnswerRetrieverInterface()
 
-    rag = Rag(pre_proccessor, index_data_impl, get_final_answers_retriever)
+    rag = Rag(pre_proccessor, 
+              index_data_impl, 
+              get_final_answers_retriever,
+              index_optimizers)
     rag.answer_queries(queries)
 
-    results = RagResults(
-        queries=queries,
-        pre_proccessor_name=pre_proccessor.__class__.__name__,
-        index_data_impl_name=index_data_impl.__class__.__name__,
-        get_final_answers_impl_name=get_final_answers_retriever.__class__.__name__
-    )
+    results = RagResults(rag=rag, queries=queries)
     results.save_to_file('test_results/rag_results.json')
 
 if __name__ == "__main__":
