@@ -1,17 +1,19 @@
 import json
 import os
 from components.query import Query
+from components.rag import Rag
 
 class RagResults:
-    def __init__(self, queries: list[Query], pre_proccessor_name, index_data_impl_name, get_final_answers_impl_name):
+    def __init__(self, rag: Rag, queries: list[Query]):
         self.version = "1.0.1"
         self.queries = queries
         self.wrong_retrieved_queries = self.get_wrong_retrieved_queries(queries)
-        self.pre_proccessor_name = pre_proccessor_name
-        self.index_data_impl_name = index_data_impl_name
-        self.get_final_answers_impl_name = get_final_answers_impl_name
+        self.pre_proccessor_name = rag.pre_proccessor.__class__.__name__
+        self.index_optimizer_name = rag.indexing_optimizers.__class__.__name__
+        self.index_data_impl_name = rag.index_data_impl.__class__.__name__
+        self.get_final_answers_impl_name = rag.final_answers_retrievers.__class__.__name__
         self.recall = self.recall_at_k(queries, k=20)
-        self.mmr = self.mrr(queries, k=20) 
+        self.mmr = self.mrr(queries, k=20)
 
     def get_wrong_retrieved_queries(self, queries : list[Query]):
         res = []

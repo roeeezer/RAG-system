@@ -14,11 +14,17 @@ class WebTextUnit(ABC):
     def get_content(self) -> str:
         pass
 
+    @abstractmethod
+    def get_indexing_optimized_content(self) -> str:
+        pass
+
 @dataclass
 class WebTextSection:
     doc_id: str
     section_id: str
     content: str
+    indexing_optimized_content: str
+
 
     def get_id(self) -> str:
         return self.doc_id + "_" + self.section_id
@@ -28,6 +34,9 @@ class WebTextSection:
 
     def get_content(self) -> str:
         return self.content
+
+    def get_indexing_optimized_content(self) -> str:
+        return self.indexing_optimized_content    
 
     def to_dict(self):
         return {
