@@ -40,16 +40,18 @@ class LemmatizerIndexOptimizer(IndexingTextOptimizerInterface):
             # Add spaces around punctuation and special characters
             text = re.sub(r"([^\w\s])", r" \1 ", text)  # Add spaces around non-word characters
             text = re.sub(r"\s+", " ", text)  # Normalize multiple spaces to a single space
-            preprocessed_texts.append(text.strip())
+            # Remmove * : . , " ' from text
+            text = re.sub(r"[*:,\"']", "", text)
+            preprocessed_texts.append(text.strip().split())
         # Perform lemmatization using Trankit
 
         lemmatize_tokens = self.pipeline.lemmatize(preprocessed_texts)
 
         # Construct lemmatized text by iterating over tokens
         lemmatized_text = " ".join(
-            token.get('lemma', token['text']) for sentence in lemmatize_tokens['sentences'] for token in sentence['tokens']
+            token['text'] if token.get('lemma', "_") == "_" else token['lemma'] for sentence in lemmatize_tokens['sentences'] for token in sentence['tokens']
         )
-    
+
         return lemmatized_text
     
     def optimize_query(self, lst_text: List[str]) -> List[str]:
