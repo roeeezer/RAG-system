@@ -20,7 +20,6 @@ class Bm25Indexer(IndexerInferface):
         self.corpus_tokens = None
         self.dictionary = None
         self.index = None
-        self.pipeline = trankit.Pipeline("hebrew")
 
     def index_data(self, web_text_units : list[WebTextUnit]):
         self.web_text_units = web_text_units
