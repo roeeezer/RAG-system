@@ -30,7 +30,7 @@ def run_rag():
     queries = queries[:15]
     gemini = Gemini()
     pre_proccessor = WebDataPreProccessor(web_database_name)
-    index_optimizers = [HydeIndexingOptimizer(gemini), Lema()]
+    index_optimizers = [HydeIndexingOptimizer(gemini)]
     index_data_impl = Bm25Indexer()
     get_final_answers_retriever = GeminiFreeTierAnswerRetriever(gemini)
 

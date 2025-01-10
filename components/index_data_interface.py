@@ -39,10 +39,8 @@ class Bm25Indexer(IndexerInferface):
         return self.index
 
     def bm25_retrieve(self, query, k):
-        # lemmatize the query and map tokens using the corpus dictionary
-        lemmatized_query = self._preprocess_with_trankit(query).split()
 
-        ids = [self.dictionary.get(token) for token in lemmatized_query]
+        ids = [self.dictionary.get(token) for token in query.split() if self.dictionary.get(token) is not None]
 
         if not ids:
             print(f"No valid tokens found for query: {query}")
