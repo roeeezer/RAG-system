@@ -30,7 +30,7 @@ def run_rag():
     queries = queries[:15]
     gemini = Gemini()
     pre_proccessor = WebDataPreProccessor(web_database_name)
-    index_optimizers = [SynonymEnrichmentOptimizer(top_k=5)]
+    index_optimizers = [SynonymEnrichmentOptimizer(top_k=4)]
     index_data_impl = Bm25Indexer()
     get_final_answers_retriever = EmptyAnswerRetrieverInterface()
 
@@ -42,6 +42,37 @@ def run_rag():
 
     results = RagResults(rag=rag, queries=queries)
     results.save_to_file('test_results/rag_results.json')
+
+
+def compare_rug_systems():
+    queries = parse_queries_csv(eval_set_name)
+    queries = queries[:15]
+    web_data_pre_proccessor =  WebDataPreProccessor(web_database_name)
+    rags = []
+    for k in range(1,15):
+        rags.append(
+            Rag(
+                web_data_pre_proccessor, 
+                  Bm25Indexer(), 
+                  EmptyAnswerRetrieverInterface(),
+                  [SynonymEnrichmentOptimizer(top_k=k)]
+                  )
+        )
+    max_metric = -1
+    best_k = -1
+    k = 1
+    for rag in rags:
+        rag.answer_queries(queries)
+        results = RagResults(rag=rag, queries=queries)
+        recall, mrr = results.recall, results.mmr
+        avg = (recall + mrr) / 2
+        print(f"K={k} Recall: {recall}, MRR: {mrr} Avg: {avg}")
+        if avg > max_metric:
+            max_metric = avg
+            best_k = k
+        k += 1
+    print(f"Best K: {best_k}")
+
 
 if __name__ == "__main__":
     run_rag()

@@ -26,14 +26,14 @@ class RagResults:
     def to_dict(self):
         return {
             "version": self.version,
+            "recall": self.recall,
+            "mmr": self.mmr,
             "queries": [self.query_to_dict(query) for query in self.queries],
             "wrong_retrieved_queries": [self.query_to_dict(query) for query in self.wrong_retrieved_queries],
             "pre_proccessor_name": self.pre_proccessor_name,
             "index_optimizer_names": self.index_optimizer_names,
             "index_data_impl_name": self.index_data_impl_name,
             "get_final_answers_impl_name": self.get_final_answers_impl_name,
-            "recall": self.recall,
-            "mmr": self.mmr
         }
 
     def query_to_dict(self, query: Query):
