@@ -34,21 +34,35 @@ class Rag:
 
     def optimize_queries(self, queries: list[Query]) -> None:
         batched_queries = [
-            [queries[i].query for i in range(start, min(start + self.batch_size, len(queries)))] 
-            for start in range(0, len(queries), self.batch_size)]
+            queries[start:min(start + self.batch_size, len(queries))]  # Keep `Query` objects instead of just strings
+            for start in range(0, len(queries), self.batch_size)
+        ]
+        
         for batch in tqdm(batched_queries):
-            for optimizer in self.indexing_optimizers:
-                optimized_queries = optimizer.optimize_queries(batch)
-            for i, query in enumerate(batch):
-                queries[i].indexing_optimized_query = optimized_queries[i]
+            query_texts = [q.query for q in batch]  # Extract the text of the queries for optimization
+            optimized_queries = query_texts  # Initialize with the raw texts of queries
             
-    
+            for optimizer in self.indexing_optimizers:
+                optimized_queries = optimizer.optimize_query(optimized_queries)  # Optimize the list of query texts
+            
+            # Assign optimized queries back to the corresponding `Query` objects
+            for i, query in enumerate(batch):
+                query.indexing_optimized_query = optimized_queries[i]
+           
     def optimize_text_units(self, web_text_units: list[WebTextUnit]) -> None:
         batched_units = [
-            [web_text_units[i].get_content() for i in range(start, min(start + self.batch_size, len(web_text_units)))] 
+            web_text_units[start:min(start + self.batch_size, len(web_text_units))]  # Keep `WebTextUnit` objects instead of just strings
             for start in range(0, len(web_text_units), self.batch_size)
         ]
+        
         for batch in tqdm(batched_units):
-            optimized_texts = self.op
+            unit_contents = [unit.get_content() for unit in batch]  # Extract the text contents for optimization
+            optimized_contents = unit_contents  # Initialize with the raw contents
+            
+            for optimizer in self.indexing_optimizers:
+                optimized_contents = optimizer.optimize_document(optimized_contents)  # Optimize the list of contents
+            
+            # Assign optimized contents back to the corresponding `WebTextUnit` objects
             for i, unit in enumerate(batch):
-                web_text_units[i].indexing_optimized_content = optimized_texts[i]
+                unit.indexing_optimized_content = optimized_contents[i]
+
