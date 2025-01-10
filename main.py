@@ -1,11 +1,10 @@
 import csv
 from components.query import Query
-from components.pre_process_data_interface import WebDataPreProccessor, WebDataPreProccessorLemmatization
+from components.pre_process_data_interface import WebDataPreProccessor
 from components.index_data_interface import Bm25Indexer
 from components.LlmAnswerRetriever.llm_answer_retriever_interface import EmptyAnswerRetrieverInterface
 from components.LlmAnswerRetriever.GeminiFreeTierAnswerRetriever import GeminiFreeTierAnswerRetriever
 from components.rag_results import RagResults
-from components.IndexOptimizer.indexing_text_optimizer_interface import  LemmatizerIndexOptimizer as Lema
 from components.rag import Rag
 from components.IndexOptimizer.word_filtering_indexing_optimizer import WordFilteringIndexingOptimizer
 from components.LlmAnswerRetriever.gemini import Gemini
@@ -30,9 +29,9 @@ def run_rag():
     queries = queries[:15]
     gemini = Gemini()
     pre_proccessor = WebDataPreProccessor(web_database_name)
-    index_optimizers = [HydeIndexingOptimizer(gemini)]
+    index_optimizers = []
     index_data_impl = Bm25Indexer()
-    get_final_answers_retriever = GeminiFreeTierAnswerRetriever(gemini)
+    get_final_answers_retriever = EmptyAnswerRetrieverInterface()
 
     rag = Rag(pre_proccessor, 
               index_data_impl, 
