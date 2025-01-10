@@ -41,7 +41,7 @@ class Rag:
         for batch in tqdm(batched_queries):
             query_texts = [q.query for q in batch]  # Extract the text of the queries for optimization
             optimized_queries = query_texts  # Initialize with the raw texts of queries
-            
+
             for optimizer in self.indexing_optimizers:
                 optimized_queries = optimizer.optimize_query(optimized_queries)  # Optimize the list of query texts
             # Assign optimized queries back to the corresponding `Query` objects

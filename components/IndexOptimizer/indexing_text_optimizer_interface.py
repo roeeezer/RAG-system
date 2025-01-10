@@ -48,18 +48,15 @@ class LemmatizerIndexOptimizer(IndexingTextOptimizerInterface):
         lemmatize_tokens = self.pipeline.lemmatize(preprocessed_texts)
 
         # Construct lemmatized text by iterating over tokens
-        lemmatized_text = " ".join(
-            token['text'] if token.get('lemma', "_") == "_" else token['lemma'] for sentence in lemmatize_tokens['sentences'] for token in sentence['tokens']
-        )
 
-        for preprocessed_test, lematized_text in zip(preprocessed_texts, lemmatized_text):
-            print("===========================================================================================")
-            print(lematized_text)
-            print("===========================================================================================")
-            print(preprocessed_test)
-            print("===========================================================================================")
-            input("Press Enter to continue...")
-        return lemmatized_text
+        lemmatized_texts = [
+            " ".join(
+                token['text'] if token.get('lemma', "_") == "_" else token['lemma']
+                for token in sentence['tokens']
+            )
+            for sentence in lemmatize_tokens['sentences']
+        ]
+        return lemmatized_texts
     
     def optimize_query(self, lst_text: List[str]) -> List[str]:
         return self.optimize_document(lst_text)
