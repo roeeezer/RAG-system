@@ -44,7 +44,6 @@ class Rag:
             
             for optimizer in self.indexing_optimizers:
                 optimized_queries = optimizer.optimize_query(optimized_queries)  # Optimize the list of query texts
-            
             # Assign optimized queries back to the corresponding `Query` objects
             for i, query in enumerate(batch):
                 query.indexing_optimized_query = optimized_queries[i]
