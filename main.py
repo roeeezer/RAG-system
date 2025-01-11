@@ -31,9 +31,9 @@ def run_rag():
     queries = queries[:100]
     gemini = Gemini()
     pre_proccessor = WebDataPreProccessor(web_database_name)
-    index_optimizers = [ WordFilteringIndexingOptimizer() ,PrefixSuffixSplitterOptimizer()]
+    index_optimizers = [PrefixSuffixSplitterOptimizer()]
     index_data_impl = Bm25Indexer()
-    get_final_answers_retriever = EmptyAnswerRetrieverInterface()
+    get_final_answers_retriever = GeminiFreeTierAnswerRetriever(gemini=gemini)
 
     rag = Rag(pre_proccessor, 
               index_data_impl, 
