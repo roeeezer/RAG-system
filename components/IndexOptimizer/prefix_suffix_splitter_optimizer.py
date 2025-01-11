@@ -47,13 +47,37 @@ class PrefixSuffixSplitterOptimizer(IndexingTextOptimizerInterface):
                 splitted_word = splitted_word[:-2]
             else:
                 splitted_word = splitted_word[:-1]
-                self.append_word(new_text, splitted_word)
+            self.append_word(new_text, splitted_word)
 
     def split_prefixes(self, new_text, splitted_word):
         while len(splitted_word) >= 1 and splitted_word[0] in self.prefixes_to_split:
             splitted_word = splitted_word[1:]
             self.append_word(new_text, splitted_word)
+            self.split_suffixes(new_text, splitted_word)
     
-    def append_word(self, new_text: list[str], word):
-        if len(word) > 1:
-            new_text.append(word)
+    def append_word(self, new_text: list[str], word: str):
+        if len(word) <= 1:
+            return
+        
+        # Check if last letter needs conversion
+        last_letter = word[-1]
+        if last_letter in "כמנפצ":
+            # Only convert to list if needed
+            word_chars = list(word)
+            word_chars[-1] = self.convert_to_ot_sofit(last_letter)
+            word = ''.join(word_chars)
+        
+        new_text.append(word)
+
+    def convert_to_ot_sofit(self, letter):
+        if letter == "כ":
+            return "ך"
+        if letter == "מ":
+            return "ם"
+        if letter == "נ":
+            return "ן"
+        if letter == "פ":
+            return "ף"
+        if letter == "צ":
+            return "ץ"
+        return letter
