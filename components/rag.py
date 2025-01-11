@@ -43,7 +43,7 @@ class Rag:
             optimized_queries = query_texts  # Initialize with the raw texts of queries
 
             for optimizer in self.indexing_optimizers:
-                optimized_queries = optimizer.optimize_query(optimized_queries)  # Optimize the list of query texts
+                optimized_queries = optimizer.optimize_queries(optimized_queries)  # Optimize the list of query texts
             # Assign optimized queries back to the corresponding `Query` objects
             for i, query in enumerate(batch):
                 query.indexing_optimized_query = optimized_queries[i]
@@ -59,7 +59,7 @@ class Rag:
             optimized_contents = unit_contents  # Initialize with the raw contents
             
             for optimizer in self.indexing_optimizers:
-                optimized_contents = optimizer.optimize_document(optimized_contents)  # Optimize the list of contents
+                optimized_contents = optimizer.optimize_documents(optimized_contents)  # Optimize the list of contents
             
             # Assign optimized contents back to the corresponding `WebTextUnit` objects
             for i, unit in enumerate(batch):

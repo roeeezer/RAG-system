@@ -7,11 +7,11 @@ class HydeIndexingOptimizer(IndexingTextOptimizerInterface):
     def __init__(self, gemini : Gemini):
         self.gemini = gemini
 
-    def optimize_query(self, lst_text: List[str]) -> List[str]:
+    def optimize_queries(self, lst_text: List[str]) -> List[str]:
         res = []
         for text in lst_text:
             res.append(self.gemini.get_llm_output(text))
         return res
 
-    def optimize_document(self, lst_text: List[str]) -> List[str]:
+    def optimize_documents(self, lst_text: List[str]) -> List[str]:
         return lst_text

@@ -30,9 +30,9 @@ class LemmatizerIndexOptimizerBert(IndexingTextOptimizerInterface):
         self.model = AutoModel.from_pretrained("dicta-il/dictabert-lex", trust_remote_code=True)
         self.model.to(self.device)
     
-    def optimize_document(self, lst_text: List[str]) -> List[str]:
+    def optimize_documents(self, lst_text: List[str]) -> List[str]:
         outputs = self.model.predict(lst_text, self.tokenizer)
         return make_lemmatized_sentence(outputs)
 
-    def optimize_query(self, lst_text: List[str]) -> List[str]:
-        return self.optimize_document(lst_text)
+    def optimize_queries(self, lst_text: List[str]) -> List[str]:
+        return self.optimize_documents(lst_text)

@@ -7,19 +7,19 @@ import re
 
 class IndexingTextOptimizerInterface(ABC):
     @abstractmethod
-    def optimize_query(self, lst_text: List[str]) -> List[str]:
+    def optimize_queries(self, queries: List[str]) -> List[str]:
         pass
 
-    def optimize_document(self, lst_text: List[str]) -> List[str]:
+    def optimize_documents(self, documents: List[str]) -> List[str]:
         pass
 
 class NoneIndexOptimizer(IndexingTextOptimizerInterface):
 
     @abstractmethod
-    def optimize_query(self, lst_text: List[str]) -> List[str]:
+    def optimize_queries(self, lst_text: List[str]) -> List[str]:
         return lst_text
     
-    def optimize_document(self, lst_text: List[str]) -> List[str]:
+    def optimize_documents(self, lst_text: List[str]) -> List[str]:
         return lst_text
     
 

@@ -13,7 +13,7 @@ class SynonymEnrichmentOptimizer(IndexingTextOptimizerInterface):
         self.expander = HebrewSynonymExpander(top_k=self.top_k)
         self.cache_file = None
     
-    def optimize_query(self, lst_text: list[str]) -> list[str]:
+    def optimize_queries(self, lst_text: list[str]) -> list[str]:
         self.cache_file = os.path.join("cache","synonym optimizer", f"e_{self.expander.__class__.__name__}k_{self.top_k} q_{len(lst_text)}.pkl")
         try:
             res = self._load_from_cache()
@@ -26,7 +26,7 @@ class SynonymEnrichmentOptimizer(IndexingTextOptimizerInterface):
             self._save_to_cache(res)
             return res
 
-    def optimize_document(self, lst_text: list[str]) -> list[str]:
+    def optimize_documents(self, lst_text: list[str]) -> list[str]:
         return lst_text
     
     def _save_to_cache(self, data: list[WebTextSection]):

@@ -25,7 +25,7 @@ class LemmatizerIndexOptimizerTrankit(IndexingTextOptimizerInterface):
         else:
             print("Using CPU to lemmatize")
     
-    def optimize_document(self, lst_text: List[str]) -> List[str]:
+    def optimize_documents(self, lst_text: List[str]) -> List[str]:
         """
         Concatenates all texts, lemmatizes as one, and splits the result based on the original grouping.
         """
@@ -44,5 +44,5 @@ class LemmatizerIndexOptimizerTrankit(IndexingTextOptimizerInterface):
 
         return lemmatized_texts
     
-    def optimize_query(self, lst_text: List[str]) -> List[str]:
-        return self.optimize_document(lst_text)
+    def optimize_queries(self, lst_text: List[str]) -> List[str]:
+        return self.optimize_documents(lst_text)

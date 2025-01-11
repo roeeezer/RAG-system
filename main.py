@@ -10,6 +10,7 @@ from components.IndexOptimizer.word_filtering_indexing_optimizer import WordFilt
 from components.LlmAnswerRetriever.gemini import Gemini
 from components.IndexOptimizer.hyde_indexing_optimizer import HydeIndexingOptimizer
 from components.IndexOptimizer.synonym_encrichment_optimizer import SynonymEnrichmentOptimizer
+from components.IndexOptimizer.prefix_suffix_splitter_optimizer import PrefixSuffixSplitterOptimizer
 
 use_small_data = False
 small_suffix = "_small" if use_small_data else ""
@@ -30,7 +31,7 @@ def run_rag():
     queries = queries[:100]
     gemini = Gemini()
     pre_proccessor = WebDataPreProccessor(web_database_name)
-    index_optimizers = [SynonymEnrichmentOptimizer(top_k=2)]
+    index_optimizers = [PrefixSuffixSplitterOptimizer()]
     index_data_impl = Bm25Indexer()
     get_final_answers_retriever = EmptyAnswerRetrieverInterface()
 

@@ -58,13 +58,13 @@ class WordFilteringIndexingOptimizer(IndexingTextOptimizerInterface):
     def __init__(self):
         self.words_to_filter = [word for word, _ in words_to_filter_by_category]
 
-    def optimize_query(self, lst_text: List[str]) -> List[str]:
+    def optimize_queries(self, lst_text: List[str]) -> List[str]:
         res = []
         for text in lst_text:
             res.append(self.optimize_text(text))
         return res
 
-    def optimize_document(self, lst_text: List[str]) -> List[str]:
+    def optimize_documents(self, lst_text: List[str]) -> List[str]:
         res = []
         for text in lst_text:
             res.append(self.optimize_text(text))
