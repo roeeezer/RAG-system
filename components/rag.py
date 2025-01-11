@@ -16,7 +16,7 @@ class Rag:
         self.index_data_impl = index_data_impl
         self.final_answers_retrievers = get_final_answers_impl
         self.indexing_optimizers = index_optimizers
-        self.batch_size = 10
+        self.batch_size = 200
 
     def answer_queries(self, queries: list[Query]):
         print("Loading or processing data")

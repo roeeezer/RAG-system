@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from bs4 import BeautifulSoup, Tag
 import glob
 import re
-import torch
 from markdownify import MarkdownConverter
 from components.web_text_unit import WebTextUnit, WebTextSection
 from tqdm import tqdm
@@ -10,7 +9,6 @@ import pickle
 import time
 from typing import List
 import os
-import trankit
 from tqdm import tqdm
 
 debug_mode = False

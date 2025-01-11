@@ -27,10 +27,10 @@ def parse_queries_csv(file_path) -> list[Query]:
 
 def run_rag():
     queries = parse_queries_csv(eval_set_name)
-    queries = queries[:15]
+    queries = queries[:100]
     gemini = Gemini()
     pre_proccessor = WebDataPreProccessor(web_database_name)
-    index_optimizers = [SynonymEnrichmentOptimizer(top_k=4)]
+    index_optimizers = [SynonymEnrichmentOptimizer(top_k=2)]
     index_data_impl = Bm25Indexer()
     get_final_answers_retriever = EmptyAnswerRetrieverInterface()
 
@@ -46,10 +46,10 @@ def run_rag():
 
 def compare_rug_systems():
     queries = parse_queries_csv(eval_set_name)
-    queries = queries[:15]
+    queries = queries[:100]
     web_data_pre_proccessor =  WebDataPreProccessor(web_database_name)
     rags = []
-    for k in range(1,15):
+    for k in range(1,10):
         rags.append(
             Rag(
                 web_data_pre_proccessor, 
