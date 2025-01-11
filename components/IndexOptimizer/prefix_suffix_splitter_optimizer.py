@@ -1,5 +1,12 @@
+import sys
+import os
+
+# Add the project root to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 from components.IndexOptimizer.indexing_text_optimizer_interface import IndexingTextOptimizerInterface
 from typing import List
+
 
 
 class PrefixSuffixSplitterOptimizer(IndexingTextOptimizerInterface):
@@ -36,14 +43,17 @@ class PrefixSuffixSplitterOptimizer(IndexingTextOptimizerInterface):
         new_text = []
         for word in text:
             self.append_word(new_text, word)
-            self.split_prefixes(new_text, word)
-            self.split_suffixes(new_text, word)
+            self.split_prefixes_and_suffixes(new_text, word)
         return " ".join(new_text)
+
+    def split_prefixes_and_suffixes(self, new_text, word):
+        self.split_prefixes(new_text, word)
+        self.split_suffixes(new_text, word)
 
     def split_suffixes(self, new_text, splitted_word):
         while (len(splitted_word) >= 1 and splitted_word[-1] in self.suffixes_to_split) or \
-            (len(splitted_word) >= 2 and splitted_word[-2] in self.suffixes_to_split) :
-            if len(splitted_word) >= 2 and splitted_word[-2] in self.suffixes_to_split:
+            (len(splitted_word) >= 2 and splitted_word[-2:] in self.suffixes_to_split) :
+            if len(splitted_word) >= 2 and splitted_word[-2:] in self.suffixes_to_split:
                 splitted_word = splitted_word[:-2]
             else:
                 splitted_word = splitted_word[:-1]
@@ -81,3 +91,14 @@ class PrefixSuffixSplitterOptimizer(IndexingTextOptimizerInterface):
         if letter == "צ":
             return "ץ"
         return letter
+
+
+def test():
+    o = PrefixSuffixSplitterOptimizer()
+    new_text = []
+    word = "ניצול"
+    o.split_prefixes_and_suffixes( new_text, word)
+    print(new_text)
+
+if __name__ == "__main__":
+    test()
