@@ -50,10 +50,10 @@ class PrefixSuffixSplitterOptimizer(IndexingTextOptimizerInterface):
     def split_and_trim_hebrew_words(self, text):
         # Split the text by whitespace or backslash
         words = re.split(r'[\\\s]+', text)
-        # Regex pattern to match only Hebrew characters
-        hebrew_pattern = re.compile(r'^[\u0590-\u05FF]+$')
-        # Trim non-Hebrew characters from the sides of each word
-        trimmed_words = [re.sub(r'^[^\u0590-\u05FF]+|[^\u0590-\u05FF]+$', '', word) for word in words]
+        # Regex pattern to match Hebrew characters with optional quotes in the middle
+        hebrew_pattern = re.compile(r'^[\u0590-\u05FF]+[\'\"]?[\u0590-\u05FF]+$')
+        # Trim non-Hebrew characters from the sides of each word, allowing for quotes
+        trimmed_words = [re.sub(r'^[^\u0590-\u05FF\'\"]+|[^\u0590-\u05FF\'\"]+$', '', word) for word in words]
         # Filter out empty strings and non-Hebrew words
         filtered_words = [word for word in trimmed_words if word and hebrew_pattern.match(word)]
         return filtered_words
@@ -107,12 +107,9 @@ class PrefixSuffixSplitterOptimizer(IndexingTextOptimizerInterface):
 
 def test():
     o = PrefixSuffixSplitterOptimizer()
-    new_text = []
-    word = "ניצול"
-    o.split_prefixes_and_suffixes( new_text, word)
-    print(new_text)
+    sentence = "מה אומר הקיצור תט\"ר?"
+    res = o.optimize_text(sentence)
+    print(res)
 
 if __name__ == "__main__":
-    o = PrefixSuffixSplitterOptimizer()
-    res = o.split_and_trim_hebrew_words("טיפולים לילדים עם הפרעה בשטף הדיבור (גמגום) (זכות). זה המשך, המשפט- עם0 סימנים- מוזרים")
-    print(res)
+    test()
