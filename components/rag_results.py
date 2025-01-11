@@ -5,7 +5,7 @@ from components.rag import Rag
 
 class RagResults:
     def __init__(self, rag: Rag, queries: list[Query]):
-        self.version = "1.0.1"
+        self.version = "1.0.2"
         self.queries = queries
         self.wrong_retrieved_queries = self.get_wrong_retrieved_queries(queries)
         self.pre_proccessor_name = rag.pre_proccessor.__class__.__name__
@@ -14,6 +14,7 @@ class RagResults:
         self.get_final_answers_impl_name = rag.final_answers_retrievers.__class__.__name__
         self.recall = self.recall_at_k(queries, k=20)
         self.mmr = self.mrr(queries, k=20)
+        self.llm_tokens_counter = rag.final_answers_retrievers.get_sent_tokens_counter()
 
     def get_wrong_retrieved_queries(self, queries : list[Query]):
         res = []

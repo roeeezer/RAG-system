@@ -26,3 +26,6 @@ class GeminiFreeTierAnswerRetriever(LlmAnswerRetrieverInterface):
                 llm_input = self.get_llm_input(query.query, " ".join([source.get_content() for source in query.answer_sources]))
                 llm_output = self.get_llm_output(llm_input)
                 query.final_answer = llm_output
+    
+    def get_sent_tokens_counter(self) -> int:
+        return self.gemini.tokens_counter

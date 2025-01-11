@@ -29,7 +29,7 @@ def parse_queries_csv(file_path) -> list[Query]:
 def run_rag():
     queries = parse_queries_csv(eval_set_name)
     queries = queries[:100]
-    gemini = Gemini()
+    gemini = Gemini(constraint_model=True)
     pre_proccessor = WebDataPreProccessor(web_database_name)
     index_optimizers = [PrefixSuffixSplitterOptimizer()]
     index_data_impl = Bm25Indexer()

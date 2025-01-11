@@ -13,8 +13,26 @@ class LlmAnswerRetrieverInterface(ABC):
     def retrieve_final_answers(self, queries: list[Query]):
         pass
 
+    @abstractmethod
+    def get_sent_tokens_counter(self) -> int:
+        pass    
+
 class EmptyAnswerRetrieverInterface(LlmAnswerRetrieverInterface):
+    def __init__(self):
+        self.sent_tokens_counter = 0
+
     def retrieve_final_answers(self, queries: list[Query]):
+        for query in queries:
+            query_counter = 0
+            query_counter += len(query.query.split())
+            for answer_source in query.answer_sources:
+                query_counter += len(answer_source.get_content().split())
+            self.sent_tokens_counter += query_counter
+            if query_counter > 1000:
+                print("Warning: query_counter > 1000")
         return
+    
+    def get_sent_tokens_counter(self) -> int:
+        return self.sent_tokens_counter   
 
 

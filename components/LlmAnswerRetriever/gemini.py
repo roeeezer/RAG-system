@@ -14,12 +14,14 @@ class Gemini():
             api_keys = [line.strip() for line in f if line.strip()]
         return api_keys
     
-    def __init__(self):
+    def __init__(self, constraint_model=False):
         self.api_keys = self.get_api_keys()
         self.current_key_index = 0
         self.last_exception_time = None
         self.wait_time = 61
         self.set_api_key(self.api_keys[self.current_key_index])
+        self.tokens_counter = 0
+        self.constraint_model = constraint_model
 
     def set_api_key(self, api_key):
         self.api_key = api_key
@@ -27,10 +29,17 @@ class Gemini():
         self.model = genai.GenerativeModel("gemini-1.5-flash")
 
     def get_llm_output(self, llm_input):
+        input_tokens = len(llm_input.split())
+        if self.constraint_model:
+            if input_tokens > 1000:
+                print("Tokens limit exceeded")
+                print("llm_input[:100]: ", llm_input[:100])   
+            llm_input = llm_input[:1000]
         retries = len(self.api_keys)
         for attempt in range(retries):
             try:
                 response = self.model.generate_content(llm_input)
+                self.tokens_counter += input_tokens
                 return response.text
             except Exception as e:
                 print(f"Request failed with API key {self.current_key_index}: {e}")
