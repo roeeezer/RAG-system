@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 import bm25s
 from components.web_text_unit import WebTextUnit
 from components.query import Query
-import trankit
 
 class IndexerInferface(ABC):
     @abstractmethod
