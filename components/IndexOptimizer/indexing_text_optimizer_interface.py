@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
-import trankit
-import torch
 from typing import List
-import re
+
 
 
 class IndexingTextOptimizerInterface(ABC):
