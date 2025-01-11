@@ -2,14 +2,9 @@ from components.IndexOptimizer.indexing_text_optimizer_interface import Indexing
 from typing import List
 
 words_to_filter_by_category = [
-    ('ה', 'article'),
-    ('ו', 'conjunction'),
     ('או', 'conjunction'),
     ('אבל', 'conjunction'),
     ('כי', 'conjunction'),
-    ('ב', 'preposition'),
-    ('ל', 'preposition'),
-    ('כ', 'preposition'),
     ('על', 'preposition'),
     ('עם', 'preposition'),
     ('לפני', 'preposition'),
@@ -50,6 +45,20 @@ words_to_filter_by_category = [
     ('כאן', 'other'),
     ('עכשיו', 'other'),
     ('בבקשה', 'other'),
+    ('ממש', 'other'),
+    ('אז', 'other'),
+    ('כך', 'other'),
+    ('ככה', 'other'),
+    ('כמה', 'other'),
+    ('כמו', 'other'),
+    ('האם', 'other'),
+    ('איפה', 'other'),
+    ('מתי', 'other'),
+    ('איך', 'other'),
+    ('למה', 'other'),
+    ('איזה', 'other'),
+    ('יתכן', 'other'),
+    ('ייתכן', 'other'),
 ]
 
 

@@ -32,6 +32,7 @@ class RagResults:
             "get_final_answers_impl_name": self.get_final_answers_impl_name,
             "recall": self.recall,
             "mmr": self.mmr,
+            "average_recall_mrr": (self.recall + self.mmr) / 2,
             "wrong_retrieved_queries": [self.query_to_dict(query) for query in self.wrong_retrieved_queries],
             "queries": [self.query_to_dict(query) for query in self.queries],
         }
