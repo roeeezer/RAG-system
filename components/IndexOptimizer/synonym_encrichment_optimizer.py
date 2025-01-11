@@ -1,8 +1,8 @@
 import os
 import pickle
 from components.IndexOptimizer.indexing_text_optimizer_interface import IndexingTextOptimizerInterface
-from components.hebrew_synonym_expander import HebrewSynonymExpander
-from components.hebrew_semantic_expander import HebrewSemanticExpander
+from components.SynonymExpanders.hebrew_synonym_expander import HebrewSynonymExpander
+from components.SynonymExpanders.hebrew_semantic_expander import HebrewSemanticExpander
 from components.web_text_unit import WebTextSection
 
 
