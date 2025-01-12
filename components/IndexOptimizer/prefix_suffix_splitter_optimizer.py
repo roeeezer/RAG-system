@@ -107,7 +107,7 @@ class PrefixSuffixSplitterOptimizer(IndexingTextOptimizerInterface):
 
 def test():
     o = PrefixSuffixSplitterOptimizer()
-    sentence = "מה אומר הקיצור תט\"ר?"
+    sentence = "הדרכים"
     res = o.optimize_text(sentence)
     print(res)
 

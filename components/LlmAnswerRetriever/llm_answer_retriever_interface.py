@@ -28,8 +28,6 @@ class EmptyAnswerRetrieverInterface(LlmAnswerRetrieverInterface):
             for answer_source in query.answer_sources:
                 query_counter += len(answer_source.get_content().split())
             self.sent_tokens_counter += query_counter
-            if query_counter > 1000:
-                print("Warning: query_counter > 1000")
         return
     
     def get_sent_tokens_counter(self) -> int:
