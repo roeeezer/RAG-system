@@ -59,6 +59,7 @@ words_to_filter_by_category = [
     ('איזה', 'other'),
     ('יתכן', 'other'),
     ('ייתכן', 'other'),
+    ('נכון', 'other'),
 ]
 
 

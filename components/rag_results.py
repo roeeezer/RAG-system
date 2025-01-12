@@ -12,7 +12,8 @@ class RagResults:
         self.index_optimizer_names = [ optimizer.__class__.__name__ for optimizer in rag.indexing_optimizers]
         self.index_data_impl_name = rag.index_data_impl.__class__.__name__
         self.get_final_answers_impl_name = rag.final_answers_retrievers.__class__.__name__
-        self.recall = self.recall_at_k(queries, k=20)
+        self.recall_20 = self.recall_at_k(queries, k=20)
+        self.recall_5 = self.recall_at_k(queries, k=5)
         self.mmr = self.mrr(queries, k=20)
         self.llm_tokens_counter = rag.final_answers_retrievers.get_sent_tokens_counter()
 
@@ -31,20 +32,23 @@ class RagResults:
             "index_optimizer_names": self.index_optimizer_names,
             "index_data_impl_name": self.index_data_impl_name,
             "get_final_answers_impl_name": self.get_final_answers_impl_name,
-            "recall": self.recall,
+            "recall_20": self.recall_20,
+            "recall_5": self.recall_5,
             "mmr": self.mmr,
-            "average_recall_mrr": (self.recall + self.mmr) / 2,
+            "average_recall_20_mrr": (self.recall_20 + self.mmr) / 2,
             "wrong_retrieved_queries": [self.query_to_dict(query) for query in self.wrong_retrieved_queries],
             "queries": [self.query_to_dict(query) for query in self.queries],
         }
 
     def query_to_dict(self, query: Query):
         return {
+            "number": query.number,
             "gold_doc_id": query.gold_doc_id,
             "query": query.query,
+            "rank": query.rank,
             "indexing_optimized_query": query.indexing_optimized_query,
+            "final_answer": query.final_answer,
             "answer_source": [section.to_dict() for section in query.answer_sources] if query.answer_sources else None,
-            "final_answer": query.final_answer
         }
     
 
@@ -57,12 +61,13 @@ class RagResults:
     @staticmethod
     def mrr(queries : list[Query], k=100):
         s = 0.0
-        for q in queries:
-            relevant_id = q.gold_doc_id
-            topk_doc_ids = [section.doc_id for section in q.answer_sources[:k]]
+        for query in queries:
+            relevant_id = query.gold_doc_id
+            topk_doc_ids = [section.doc_id for section in query.answer_sources[:k]]
             rr = 0.0
             for rank, doc_id in enumerate(topk_doc_ids, start=1):
                 if doc_id == relevant_id:
+                    query.rank = rank
                     rr = 1.0 / rank
                     break
             s += rr

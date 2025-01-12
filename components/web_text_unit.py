@@ -19,7 +19,7 @@ class WebTextUnit(ABC):
         pass
 
 @dataclass
-class WebTextSection:
+class WebTextSection(WebTextUnit):
     doc_id: str
     section_id: str
     content: str

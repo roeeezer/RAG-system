@@ -76,7 +76,7 @@ def compare_rug_systems():
     for rag in rags:
         rag.answer_queries(queries)
         results = RagResults(rag=rag, queries=queries)
-        recall, mrr = results.recall, results.mmr
+        recall, mrr = results.recall_20, results.mmr
         avg = (recall + mrr) / 2
         print(f"K={k} Recall: {recall}, MRR: {mrr} Avg: {avg}")
         if avg > max_metric:
