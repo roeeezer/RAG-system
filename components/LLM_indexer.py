@@ -8,7 +8,7 @@ from tqdm import tqdm
 from typing import List
 
 class LlmIndexer(IndexerInferface):
-    def __init__(self, model, batch_size=32):
+    def __init__(self, model, batch_size=64):
         self.model = SentenceTransformer(model)
         self.embeddings = None
         self.web_text_units = None
@@ -26,7 +26,7 @@ class LlmIndexer(IndexerInferface):
         for batch in tqdm(batches):
             texts = [web_text_unit.get_content() for web_text_unit in batch]
             self.doc_ids.extend([web_text_unit.get_doc_id() for web_text_unit in batch])
-            embedding = self.model.encode(texts, normalize_embeddings=False)
+            embedding = self.model.encode(texts, normalize_embeddings=True)
             self.embeddings.extend(embedding)
         
         self.st_vectors = np.array(self.embeddings)
@@ -34,7 +34,7 @@ class LlmIndexer(IndexerInferface):
         
     def retrieve_answer_source(self, queries: List[Query], k: int) -> list[WebTextUnit]:
         queries_text = [query.query for query in queries]
-        q_emb = self.model.encode(queries_text, normalize_embeddings=False)
+        q_emb = self.model.encode(queries_text, normalize_embeddings=True)
         print(q_emb.shape)
         print(self.st_vectors.shape)
         dot_scores = q_emb @ self.st_vectors.T
