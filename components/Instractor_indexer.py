@@ -82,17 +82,17 @@ class InstractorIndexer(IndexerInferface):
         q_emb = np.array(query_embeddings)  # Shape: (num_queries, emb_dim)
 
         # Dot product for similarity (same as cosine if normalized)
-        dot_scores = self.st_vectors @ q_emb.T
+        dot_scores = q_emb @ self.st_vectors.T
 
         # Step 3: For each query, find top-k docs
-        sorted_indices = np.argsort(-dot_scores, axis=0)  # shape: (num_docs, num_queries)
-        topk_indices = sorted_indices[:k, :]              # shape: (k, num_queries)
+        sorted_indices = np.argsort(-dot_scores, axis=1) 
+        topk_indices = sorted_indices[:, :k]              
 
         # Step 4: Assign results to each query
         # We'll build a list of lists: results_for_all_queries
         results_for_all_queries = []
         for query_idx, query in enumerate(queries):
-            doc_indices_for_this_query = topk_indices[:, query_idx]
+            doc_indices_for_this_query = topk_indices[query_idx]
             retrieved_docs = [self.web_text_units[i] for i in doc_indices_for_this_query]
             # Store in the query object
             query.answer_sources = retrieved_docs

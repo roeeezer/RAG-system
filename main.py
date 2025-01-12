@@ -10,11 +10,13 @@ from components.rag import Rag
 from components.IndexOptimizer.word_filtering_indexing_optimizer import WordFilteringIndexingOptimizer
 from components.LlmAnswerRetriever.gemini import Gemini
 from components.IndexOptimizer.hyde_indexing_optimizer import HydeIndexingOptimizer
+from components.Instractor_indexer import InstractorIndexer
 from components.IndexOptimizer.synonym_encrichment_optimizer import SynonymEnrichmentOptimizer
 from components.IndexOptimizer.prefix_suffix_splitter_optimizer import PrefixSuffixSplitterOptimizer
+from components.LLM_indexer import LlmIndexer 
 
 
-data_set_name = f'our-set'
+data_set_name = f'eval-set'
 web_database_name = f'kolzchut'
 constrained_model = False
 cons = "_cons" if constrained_model else ""
@@ -41,10 +43,12 @@ def run_rag():
 
 def build_rag():
     gemini = Gemini(constraint_model=constrained_model)
+    st_model = 'intfloat/multilingual-e5-large'
+
     pre_proccessor = WebDataPreProccessor(web_database_name)
-    index_optimizers = [PrefixSuffixSplitterOptimizer()]
-    index_data_impl = Bm25Indexer()
-    get_final_answers_retriever = GeminiFreeTierAnswerRetriever(gemini=gemini)
+    index_optimizers = []
+    index_data_impl = InstractorIndexer(model=st_model)
+    get_final_answers_retriever = EmptyAnswerRetrieverInterface()
     rag = Rag(pre_proccessor, 
               index_data_impl, 
               get_final_answers_retriever,
