@@ -40,11 +40,13 @@ class RagResults:
 
     def query_to_dict(self, query: Query):
         return {
+            "number": query.number,
             "gold_doc_id": query.gold_doc_id,
             "query": query.query,
+            "rank": query.rank,
             "indexing_optimized_query": query.indexing_optimized_query,
+            "final_answer": query.final_answer,
             "answer_source": [section.to_dict() for section in query.answer_sources] if query.answer_sources else None,
-            "final_answer": query.final_answer
         }
     
 
@@ -57,12 +59,13 @@ class RagResults:
     @staticmethod
     def mrr(queries : list[Query], k=100):
         s = 0.0
-        for q in queries:
-            relevant_id = q.gold_doc_id
-            topk_doc_ids = [section.doc_id for section in q.answer_sources[:k]]
+        for query in queries:
+            relevant_id = query.gold_doc_id
+            topk_doc_ids = [section.doc_id for section in query.answer_sources[:k]]
             rr = 0.0
             for rank, doc_id in enumerate(topk_doc_ids, start=1):
                 if doc_id == relevant_id:
+                    query.rank = rank
                     rr = 1.0 / rank
                     break
             s += rr

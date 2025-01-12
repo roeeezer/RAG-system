@@ -9,12 +9,12 @@ from tqdm import tqdm
 class Rag:
     def __init__(self, 
                  pre_proccessor: PreProcessDataInterface, 
-                 index_data_impl: IndexerInferface, 
-                 get_final_answers_impl: LlmAnswerRetrieverInterface,
+                 data_indexer: IndexerInferface, 
+                 final_answer_retriever: LlmAnswerRetrieverInterface,
                  index_optimizers: list[IndexingTextOptimizerInterface]):
         self.pre_proccessor = pre_proccessor
-        self.index_data_impl = index_data_impl
-        self.final_answers_retrievers = get_final_answers_impl
+        self.index_data_impl = data_indexer
+        self.final_answers_retrievers = final_answer_retriever
         self.indexing_optimizers = index_optimizers
         self.batch_size = 200
 

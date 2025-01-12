@@ -14,7 +14,7 @@ from components.IndexOptimizer.synonym_encrichment_optimizer import SynonymEnric
 from components.IndexOptimizer.prefix_suffix_splitter_optimizer import PrefixSuffixSplitterOptimizer
 
 
-data_set_name = f'our-set'
+data_set_name = f'test-set'
 web_database_name = f'kolzchut'
 constrained_model = False
 cons = "_cons" if constrained_model else ""
