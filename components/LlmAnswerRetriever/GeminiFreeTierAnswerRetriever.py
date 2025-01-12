@@ -11,13 +11,13 @@ class GeminiFreeTierAnswerRetriever(LlmAnswerRetrieverInterface):
     def get_llm_output(self, llm_input):
         return self.gemini.get_llm_output(llm_input)
     
-    def get_llm_input(self, query, answer_source):
+    def get_llm_input(self, query, answer_sources):
         script_directory = os.path.dirname(__file__)
         file_path = os.path.join(script_directory, "llm_input_pattern.txt")
         with open(file_path, encoding="utf-8") as file:
             pattern = file.read()
         
-        filled_pattern = pattern.replace("{Query}", query).replace("{AnswerSource}", answer_source)
+        filled_pattern = pattern.replace("{Query}", query).replace("{AnswerSource}", answer_sources)
         return filled_pattern
 
     def retrieve_final_answers(self, queries: list[Query]):
