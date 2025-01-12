@@ -10,6 +10,6 @@ class Query:
         self.query = query
         self.indexing_optimized_query: None | str = None
         self.retrieved_doc_id: None | str = None 
-        self.answer_sources: None | list[WebTextUnit] = None
+        self.answer_sources: list[WebTextUnit] = []
         self.final_answer: None | str = None 
         self.rank: None | str = None

@@ -45,6 +45,6 @@ class LlmIndexer(IndexerInferface):
 
         for query_idx, query in enumerate(queries):
             doc_indices_for_query = topk_indices[query_idx]
-            query.answer_sources = [self.web_text_units[i] for i in doc_indices_for_query]
+            query.answer_sources.extend([self.web_text_units[i] for i in doc_indices_for_query])
 
         

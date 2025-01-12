@@ -95,7 +95,7 @@ class InstractorIndexer(IndexerInferface):
             doc_indices_for_this_query = topk_indices[query_idx]
             retrieved_docs = [self.web_text_units[i] for i in doc_indices_for_this_query]
             # Store in the query object
-            query.answer_sources = retrieved_docs
+            query.answer_sources.extend(retrieved_docs)
             results_for_all_queries.append(retrieved_docs)
 
         # Step 5: Return top-k WebTextUnits for each query
