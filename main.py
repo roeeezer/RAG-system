@@ -1,4 +1,5 @@
 import csv
+import os
 from components.query import Query
 from components.pre_process_data_interface import WebDataPreProccessor
 from components.index_data_interface import Bm25Indexer
@@ -12,10 +13,11 @@ from components.IndexOptimizer.hyde_indexing_optimizer import HydeIndexingOptimi
 from components.IndexOptimizer.synonym_encrichment_optimizer import SynonymEnrichmentOptimizer
 from components.IndexOptimizer.prefix_suffix_splitter_optimizer import PrefixSuffixSplitterOptimizer
 
-use_small_data = False
-small_suffix = "_small" if use_small_data else ""
-eval_set_name = f'eval-set{small_suffix}.csv'
-web_database_name = f'kolzchut{small_suffix}'
+
+data_set_name = f'our-set'
+web_database_name = f'kolzchut'
+constrained_model = False
+cons = "_cons" if constrained_model else ""
 
 def parse_queries_csv(file_path) -> list[Query]:
     queries = []
@@ -27,26 +29,31 @@ def parse_queries_csv(file_path) -> list[Query]:
     return queries
 
 def run_rag():
-    queries = parse_queries_csv(eval_set_name)
+    queries = parse_queries_csv(f"{data_set_name}.csv")
     queries = queries[:100]
-    gemini = Gemini(constraint_model=True)
+
+    rag = build_rag()
+    rag.answer_queries(queries)
+
+    results = RagResults(rag=rag, queries=queries)
+    result_path = os.path.join("test_results",f"{data_set_name}", f"res{cons}.json")
+    results.save_to_file(result_path)
+
+def build_rag():
+    gemini = Gemini(constraint_model=constrained_model)
     pre_proccessor = WebDataPreProccessor(web_database_name)
     index_optimizers = [PrefixSuffixSplitterOptimizer()]
     index_data_impl = Bm25Indexer()
     get_final_answers_retriever = GeminiFreeTierAnswerRetriever(gemini=gemini)
-
     rag = Rag(pre_proccessor, 
               index_data_impl, 
               get_final_answers_retriever,
               index_optimizers)
-    rag.answer_queries(queries)
-
-    results = RagResults(rag=rag, queries=queries)
-    results.save_to_file('test_results/rag_results.json')
-
+              
+    return rag
 
 def compare_rug_systems():
-    queries = parse_queries_csv(eval_set_name)
+    queries = parse_queries_csv(f"{data_set_name}.csv")
     queries = queries[:100]
     web_data_pre_proccessor =  WebDataPreProccessor(web_database_name)
     rags = []
@@ -74,6 +81,12 @@ def compare_rug_systems():
         k += 1
     print(f"Best K: {best_k}")
 
+def query(query_object: str)->str:
+    rag = build_rag()
+    query_object = Query(None, query_object)
+    rag.answer_queries([query_object])
+    return query_object.final_answer
 
 if __name__ == "__main__":
+    # print(query("האם עיוור אמור לשלם על כלב נחייה בתחבורה ציבורית?"))
     run_rag()

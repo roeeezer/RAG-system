@@ -29,17 +29,18 @@ class Gemini():
         self.model = genai.GenerativeModel("gemini-1.5-flash")
 
     def get_llm_output(self, llm_input):
-        input_tokens = len(llm_input.split())
+        input_tokens = llm_input.split()
         if self.constraint_model:
-            if input_tokens > 1000:
-                print("Tokens limit exceeded")
-                print("llm_input[:100]: ", llm_input[:100])   
-            llm_input = llm_input[:1000]
+            if len(input_tokens) > 1000:
+                # print("Tokens limit exceeded")
+                # print("llm_input[:100]: ", llm_input[:100]) 
+                input_tokens = input_tokens[:1000]
+                llm_input = " ".join(input_tokens)
         retries = len(self.api_keys)
         for attempt in range(retries):
             try:
                 response = self.model.generate_content(llm_input)
-                self.tokens_counter += input_tokens
+                self.tokens_counter += len(input_tokens)
                 return response.text
             except Exception as e:
                 print(f"Request failed with API key {self.current_key_index}: {e}")
