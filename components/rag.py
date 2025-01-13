@@ -20,7 +20,7 @@ class Rag:
         self.data_indexers = data_indexers
         self.final_answers_retrievers = final_answer_retriever
         self.indexing_optimizers = index_optimizers
-        self.batch_size = 200
+        self.batch_size = 64
 
     def answer_queries(self, queries: List[Query]):
         """
@@ -47,7 +47,7 @@ class Rag:
 
         print("Retrieving answers from each indexer")
         # Retrieve top-k docs from each indexer, then aggregate
-        self.retrieve_from_all_indexers(queries, k=10)
+        self.retrieve_from_all_indexers(queries, k=1000)
 
         print("Retrieving final answers")
         self.final_answers_retrievers.retrieve_final_answers(queries)
