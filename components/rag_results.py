@@ -10,7 +10,7 @@ class RagResults:
         self.wrong_retrieved_queries = self.get_wrong_retrieved_queries(queries)
         self.pre_proccessor_name = rag.pre_proccessor.__class__.__name__
         self.index_optimizer_names = [ optimizer.__class__.__name__ for optimizer in rag.indexing_optimizers]
-        self.index_data_impl_name = "rag.index_data_impl.__class__.__name__"
+        self.index_data_impl_name = [ indexer.__class__.__name__ for indexer in rag.data_indexers]
         self.get_final_answers_impl_name = rag.final_answers_retrievers.__class__.__name__
         self.recall_20 = self.recall_at_k(queries, k=20)
         self.recall_5 = self.recall_at_k(queries, k=5)

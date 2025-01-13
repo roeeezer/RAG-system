@@ -11,12 +11,11 @@ class Rag:
     def __init__(
         self, 
         pre_proccessor: PreProcessDataInterface, 
-        data_indexers: List[IndexerInferface],      # <-- NOW A LIST
+        data_indexers: List[IndexerInferface],
         final_answer_retriever: LlmAnswerRetrieverInterface,
         index_optimizers: List[IndexingTextOptimizerInterface]
     ):
         self.pre_proccessor = pre_proccessor
-        # Instead of a single indexer, we store a list of indexers
         self.data_indexers = data_indexers
         self.final_answers_retrievers = final_answer_retriever
         self.indexing_optimizers = index_optimizers
