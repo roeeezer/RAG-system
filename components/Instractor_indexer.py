@@ -21,6 +21,8 @@ class InstractorIndexer(IndexerInferface):
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         if self.device == 'cpu':
             print("No GPU found, using CPU instead.")
+        else:
+            print("GPU found, using GPU instead.")
         # Move the model to the chosen device
         self.model.to(self.device)
 
