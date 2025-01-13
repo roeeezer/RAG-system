@@ -56,35 +56,6 @@ def build_rag():
               
     return rag
 
-def compare_rug_systems():
-    queries = parse_queries_csv(f"{data_set_name}.csv")
-    queries = queries[:100]
-    web_data_pre_proccessor =  WebDataPreProccessor(web_database_name)
-    rags = []
-    for k in range(1,10):
-        rags.append(
-            Rag(
-                web_data_pre_proccessor, 
-                  Bm25Indexer(), 
-                  EmptyAnswerRetrieverInterface(),
-                  [SynonymEnrichmentOptimizer(top_k=k)]
-                  )
-        )
-    max_metric = -1
-    best_k = -1
-    k = 1
-    for rag in rags:
-        rag.answer_queries(queries)
-        results = RagResults(rag=rag, queries=queries)
-        recall, mrr = results.recall_20, results.mmr
-        avg = (recall + mrr) / 2
-        print(f"K={k} Recall: {recall}, MRR: {mrr} Avg: {avg}")
-        if avg > max_metric:
-            max_metric = avg
-            best_k = k
-        k += 1
-    print(f"Best K: {best_k}")
-
 def query(query_object: str)->str:
     rag = build_rag()
     query_object = Query(None, query_object)
