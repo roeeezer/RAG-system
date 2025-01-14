@@ -6,6 +6,7 @@ from components.IndexOptimizer.indexing_text_optimizer_interface import Indexing
 from components.web_text_unit import WebTextUnit
 from tqdm import tqdm
 from typing import List
+import numpy as np
 
 class Rag:
     def __init__(
@@ -46,15 +47,16 @@ class Rag:
 
         print("Retrieving answers from each indexer")
         # Retrieve top-k docs from each indexer, then aggregate
-        self.retrieve_from_all_indexers(queries, k=1000)
+        self.retrieve_from_all_indexers(queries, k=20)
 
         print("Retrieving final answers")
         self.final_answers_retrievers.retrieve_final_answers(queries)
 
     def retrieve_from_all_indexers(self, queries: List[Query], k: int):
         """
-        For each query, retrieve top-k documents from EACH indexer, and 
-        combine them into the query's 'answer_sources'.
+        For each query, retrieve top-k documents from EACH indexer,
+        and combine them into the query's 'answer_sources'.
+        Round-robin approach ensures an interleaving of results.
         """
         # Initialize empty lists so we can accumulate from multiple indexers
         for query in queries:
@@ -65,28 +67,27 @@ class Rag:
             print(f" - Retrieving from indexer #{idx}")
             indexer.retrieve_answer_source(queries, k)
 
-        
         # Combine the retrieved documents from all indexers
         for query in queries:
-            answer_sources1 = query.answer_sources[:len(query.answer_sources)//2]
-            answer_sources2 = query.answer_sources[len(query.answer_sources)//2:]
-            set_ids = set()
+            answer_sources_by_indexer = [
+                query.answer_sources[i*k : (i+1)*k]
+                for i in range(len(self.data_indexers))
+            ]
+
+            # Check if any indexer returned fewer than k docs
+            min_len = min(len(sources) for sources in answer_sources_by_indexer)
+            if min_len < k:
+                print(f" - Warning: Indexer(s) returned fewer than {k} docs")
+
+            # We will round-robin through these slices.
             res = []
-            i = 0
-            j = 0
-            while i < len(answer_sources1) and j < len(answer_sources2):
-                if i < j:
-                    if answer_sources1[i].get_doc_id() not in set_ids:
-                        res.append(answer_sources1[i])
-                        set_ids.add(answer_sources1[i].get_doc_id())
-                    i += 1
-                else:
-                    if answer_sources2[j].get_doc_id() not in set_ids:
-                        res.append(answer_sources2[j])
-                        set_ids.add(answer_sources2[j].get_doc_id())
-                    j += 1
-                    
-                
+            set_ids = set()
+            for i in range(min_len):
+                for sources in answer_sources_by_indexer:
+                    if sources[i].get_id() not in set_ids:
+                        res.append(sources[i])
+                        set_ids.add(sources[i].get_id())
+
             query.answer_sources = res
 
 
