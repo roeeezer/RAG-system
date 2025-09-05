@@ -25,12 +25,12 @@ def reverse_lines(paragraph):
 
 class CustomConverter(MarkdownConverter):
     # don't format markdown links, return only their text, not their URL
-    def convert_a(self, element, text, convert_as_inline):
+    def convert_a(self, element, text, *args, **kwargs):
         """Override link conversion to return only text without URL"""
         return text
 
     # skip tables
-    def convert_table(self, element, text, convert_as_inline):
+    def convert_table(self, element, text, *args, **kwargs):
         """Skip table formatting, replace with placeholder"""
         return "[טבלה]"
 
