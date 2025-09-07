@@ -19,8 +19,7 @@ class Logger:
 
         self.logger = logging.getLogger('NLPLogger')
         self.logger.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s [%(levelname)s] [%(filename)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-
+        formatter = logging.Formatter('%(asctime)s [%(levelname)s] [%(filename)s:%(funcName)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
         file_handler = logging.FileHandler(log_file, encoding='utf-8')
         file_handler.setFormatter(formatter)
         self.logger.handlers = []  # Remove any existing handlers

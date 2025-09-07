@@ -2,9 +2,14 @@ import json
 import os
 from components.query import Query
 from components.rag import Rag
+from components.logger import Logger
 
 class RagResults:
-    def __init__(self, rag: Rag, queries: list[Query], text_units_to_search_for: int):
+    def __init__(self, rag: Rag, queries: list[Query], text_units_to_retrieve_per_indexer: int):
+        log = Logger().get_logger()
+        log.debug('Entering RagResults __init__')
+        log.debug(f'Number of queries: {len(queries)}')
+        log.debug(f'Number of answer sources per query: {[len(q.answer_sources) for q in queries]}')
         self.version = "1.0.2"
         self.queries = queries
         self.wrong_retrieved_queries = self.get_wrong_retrieved_queries(queries)
@@ -12,13 +17,13 @@ class RagResults:
         self.index_optimizer_names = [ optimizer.__class__.__name__ for optimizer in rag.indexing_optimizers]
         self.index_data_impl_name = [ indexer.__class__.__name__ for indexer in rag.data_indexers]
         self.get_final_answers_impl_name = rag.final_answers_retrievers.__class__.__name__
-        self.text_units_to_search_for = text_units_to_search_for
-        self.effective_k_for_recall_20 = min(20, self.text_units_to_search_for)
-        self.effective_k_for_recall_5  = min(5,  self.text_units_to_search_for)
+        self.text_units_to_retrieve_per_indexer = text_units_to_retrieve_per_indexer
+        self.effective_k_for_recall_20 = min(20, self.text_units_to_retrieve_per_indexer)
+        self.effective_k_for_recall_5  = min(5,  self.text_units_to_retrieve_per_indexer)
 
         self.recall_20 = self.recall_at_k(queries, k=self.effective_k_for_recall_20)
         self.recall_5 = self.recall_at_k(queries, k=self.effective_k_for_recall_5)
-        self.mmr = self.mrr(queries, k=text_units_to_search_for)
+        self.mmr = self.mrr(queries, k=text_units_to_retrieve_per_indexer)
         self.llm_tokens_counter = rag.final_answers_retrievers.get_sent_tokens_counter()
 
     def get_wrong_retrieved_queries(self, queries : list[Query]):

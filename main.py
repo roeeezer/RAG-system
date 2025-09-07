@@ -21,7 +21,7 @@ data_set_name = f'eval-set_small'
 web_database_name = f'kolzchut_small'
 constrained_model = False
 cons = "_cons" if constrained_model else ""
-text_units_to_search_for = 2
+text_units_to_retrieve_per_indexer = 2
 
 def parse_queries_csv(file_path) -> list[Query]:
     logger = Logger().get_logger()
@@ -50,7 +50,7 @@ def run_rag():
         rag = build_rag()
         rag.answer_queries(queries)
 
-        results = RagResults(rag=rag, queries=queries, text_units_to_search_for=text_units_to_search_for)
+        results = RagResults(rag=rag, queries=queries, text_units_to_retrieve_per_indexer=text_units_to_retrieve_per_indexer)
         result_path = os.path.join("test_results",f"{data_set_name}", f"res{cons}.json")
         results.save_to_file(result_path)
         logger.debug(f'run_rag completed and results saved to {result_path}')
@@ -74,7 +74,7 @@ def build_rag():
                   index_data_impl, 
                   get_final_answers_retriever,
                   index_optimizers,
-                  text_units_to_search_for)
+                  text_units_to_retrieve_per_indexer)
         logger.debug('build_rag created Rag instance')
     except Exception as e:
         logger.error(f'Error in build_rag: {e}')

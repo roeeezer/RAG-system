@@ -16,7 +16,7 @@ class Rag:
         data_indexers: List[IndexerInferface],
         final_answer_retriever: LlmAnswerRetrieverInterface,
         index_optimizers: List[IndexingTextOptimizerInterface],
-        text_units_to_search_for: int,
+        text_units_to_retrieve_per_indexer: int,
     ):
         self.logger = Logger().get_logger()
         self.pre_proccessor = pre_proccessor
@@ -24,7 +24,7 @@ class Rag:
         self.final_answers_retrievers = final_answer_retriever
         self.indexing_optimizers = index_optimizers
         self.batch_size = 64
-        self.text_units_to_search_for = text_units_to_search_for
+        self.text_units_to_retrieve_per_indexer = text_units_to_retrieve_per_indexer
 
     def answer_queries(self, queries: List[Query]):
         self.logger.debug(f'Entering answer_queries with {len(queries)} queries')
@@ -44,7 +44,7 @@ class Rag:
                 indexer.index_data(web_text_units)
 
             self.logger.debug("Retrieving answers from each indexer")
-            self.retrieve_from_all_indexers(queries, k=self.text_units_to_search_for)
+            self.retrieve_from_all_indexers(queries, k=self.text_units_to_retrieve_per_indexer)
 
             self.logger.debug("Retrieving final answers")
             self.final_answers_retrievers.retrieve_final_answers(queries)
@@ -76,9 +76,11 @@ class Rag:
                     query.answer_sources[i*k : (i+1)*k]
                     for i in range(len(self.data_indexers))
                 ]
+                self.logger.debug(f'Query "{query.query}" retrieved {sum(len(sources) for sources in answer_sources_by_indexer)} total answer sources from all indexers')
 
                 # Check if any indexer returned fewer than k docs
                 min_len = min(len(sources) for sources in answer_sources_by_indexer)
+                self.logger.debug(f'Minimum documents returned by any indexer: {min_len}')
                 if min_len < k:
                     self.logger.warning(f'Indexer(s) returned fewer than {k} docs')
 
@@ -91,6 +93,7 @@ class Rag:
                             res.append(sources[i])
                             set_ids.add(sources[i].get_id())
 
+                self.logger.debug(f'Query "{query.query}" has {len(res)} unique answer sources')
                 query.answer_sources = res
         except Exception as e:
             self.logger.error(f'Error in retrieve_from_all_indexers: {e}')
