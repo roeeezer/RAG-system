@@ -16,10 +16,11 @@ from components.IndexOptimizer.prefix_suffix_splitter_optimizer import PrefixSuf
 from components.LLM_indexer import LlmIndexer 
 
 
-data_set_name = f'test-set'
-web_database_name = f'kolzchut'
+data_set_name = f'eval-set_small'
+web_database_name = f'kolzchut_small'
 constrained_model = False
 cons = "_cons" if constrained_model else ""
+text_units_to_search_for = 2
 
 def parse_queries_csv(file_path) -> list[Query]:
     queries = []
@@ -32,12 +33,12 @@ def parse_queries_csv(file_path) -> list[Query]:
 
 def run_rag():
     queries = parse_queries_csv(f"{data_set_name}.csv")
-    queries = queries[:100]
+    queries = queries[:10]
 
     rag = build_rag()
     rag.answer_queries(queries)
 
-    results = RagResults(rag=rag, queries=queries)
+    results = RagResults(rag=rag, queries=queries, text_units_to_search_for=text_units_to_search_for)
     result_path = os.path.join("test_results",f"{data_set_name}", f"res{cons}.json")
     results.save_to_file(result_path)
 
@@ -52,8 +53,9 @@ def build_rag():
     rag = Rag(pre_proccessor, 
               index_data_impl, 
               get_final_answers_retriever,
-              index_optimizers)
-              
+              index_optimizers,
+              text_units_to_search_for)
+
     return rag
 
 def query(query_object: str)->str:

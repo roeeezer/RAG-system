@@ -14,13 +14,15 @@ class Rag:
         pre_proccessor: PreProcessDataInterface, 
         data_indexers: List[IndexerInferface],
         final_answer_retriever: LlmAnswerRetrieverInterface,
-        index_optimizers: List[IndexingTextOptimizerInterface]
+        index_optimizers: List[IndexingTextOptimizerInterface],
+        text_units_to_search_for: int,
     ):
         self.pre_proccessor = pre_proccessor
         self.data_indexers = data_indexers
         self.final_answers_retrievers = final_answer_retriever
         self.indexing_optimizers = index_optimizers
         self.batch_size = 64
+        self.text_units_to_search_for = text_units_to_search_for
 
     def answer_queries(self, queries: List[Query]):
         """
@@ -47,7 +49,7 @@ class Rag:
 
         print("Retrieving answers from each indexer")
         # Retrieve top-k docs from each indexer, then aggregate
-        self.retrieve_from_all_indexers(queries, k=20)
+        self.retrieve_from_all_indexers(queries, k=self.text_units_to_search_for)
 
         print("Retrieving final answers")
         self.final_answers_retrievers.retrieve_final_answers(queries)
