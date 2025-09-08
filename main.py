@@ -17,11 +17,11 @@ from components.LLM_indexer import LlmIndexer
 from components.logger import Logger
 
 
-data_set_name = f'eval-set_small'
-web_database_name = f'kolzchut_small'
+data_set_name = f'queries'
+web_database_name = f'kolzchut_min_database'
 constrained_model = False
 cons = "_cons" if constrained_model else ""
-text_units_to_retrieve_per_indexer = 2
+text_units_to_retrieve_per_indexer = 7
 
 def parse_queries_csv(file_path) -> list[Query]:
     logger = Logger().get_logger()
@@ -64,8 +64,6 @@ def build_rag():
     logger.debug('Entering build_rag')
     try:
         gemini = Gemini(constraint_model=constrained_model)
-        st_model = 'intfloat/multilingual-e5-large'
-
         pre_proccessor = WebDataPreProccessor(web_database_name)
         index_optimizers = [PrefixSuffixSplitterOptimizer()]
         indexers = [Bm25Indexer()]
@@ -96,5 +94,4 @@ def query(query_object: str)->str:
         raise
 
 if __name__ == "__main__":
-    # print(query("האם עיוור אמור לשלם על כלב נחייה בתחבורה ציבורית?"))
     run_rag()
