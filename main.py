@@ -28,7 +28,7 @@ def parse_queries_csv(file_path) -> list[Query]:
     logger.debug(f'Entering parse_queries_csv with file_path={file_path}')
     queries = []
     try:
-        with open(file_path, newline='', encoding='utf-8') as csvfile:
+        with open(file_path, newline='', encoding='utf-8-sig') as csvfile:
             reader = csv.reader(csvfile)
             for row in reader:
                 gold_doc_id, query = row
