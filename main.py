@@ -68,10 +68,10 @@ def build_rag():
 
         pre_proccessor = WebDataPreProccessor(web_database_name)
         index_optimizers = [PrefixSuffixSplitterOptimizer()]
-        index_data_impl = [Bm25Indexer(), InstractorIndexer(model=st_model)]
+        indexers = [Bm25Indexer()]
         get_final_answers_retriever = GeminiFreeTierAnswerRetriever(gemini)
         rag = Rag(pre_proccessor, 
-                  index_data_impl, 
+                  indexers, 
                   get_final_answers_retriever,
                   index_optimizers,
                   text_units_to_retrieve_per_indexer)
