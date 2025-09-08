@@ -4,6 +4,13 @@ from components.query import Query
 from components.rag import Rag
 from components.logger import Logger
 
+def _norm_id(x):
+    s = str(x)
+    return s.split('#', 1)[0]  # strip section anchors if any
+
+def _get_id(section):
+    return _norm_id(section.get_doc_id() if hasattr(section, "get_doc_id") else getattr(section, "doc_id", None))
+
 class RagResults:
     def __init__(self, rag: Rag, queries: list[Query], text_units_to_retrieve_per_indexer: int):
         log = Logger().get_logger()
@@ -18,12 +25,12 @@ class RagResults:
         self.index_data_impl_name = [ indexer.__class__.__name__ for indexer in rag.data_indexers]
         self.get_final_answers_impl_name = rag.final_answers_retrievers.__class__.__name__
         self.text_units_to_retrieve_per_indexer = text_units_to_retrieve_per_indexer
-        self.effective_k_for_recall_20 = min(20, self.text_units_to_retrieve_per_indexer)
-        self.effective_k_for_recall_5  = min(5,  self.text_units_to_retrieve_per_indexer)
-
-        self.recall_20 = self.recall_at_k(queries, k=self.effective_k_for_recall_20)
-        self.recall_5 = self.recall_at_k(queries, k=self.effective_k_for_recall_5)
-        self.mmr = self.mrr(queries, k=text_units_to_retrieve_per_indexer)
+        # keep “effective_k” only for labeling in the JSON, e.g., min(requested_k, max retrieved)
+        self.effective_k_for_recall_20 = min(20, max(len(q.answer_sources) for q in queries))
+        self.effective_k_for_recall_5  = min(5,  max(len(q.answer_sources) for q in queries))
+        self.recall_20 = self.recall_at_k(queries, k=20)
+        self.recall_5  = self.recall_at_k(queries, k=5)
+        self.mmr       = self.mrr(queries, k=20)  # or a larger k you care about
         self.llm_tokens_counter = rag.final_answers_retrievers.get_sent_tokens_counter()
 
     def get_wrong_retrieved_queries(self, queries : list[Query]):
@@ -67,31 +74,27 @@ class RagResults:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(self.to_dict(), f, ensure_ascii=False, indent=4)
-    
-    
     @staticmethod
-    def mrr(queries : list[Query], k=1000):
+    def mrr(queries, k=1000):
         s = 0.0
-        for query in queries:
-            relevant_id = query.gold_doc_id
-            topk_doc_ids = [section.doc_id for section in query.answer_sources[:k]]
+        for q in queries:
+            relevant_id = _norm_id(q.gold_doc_id)
+            top = [_get_id(sec) for sec in q.answer_sources[:min(k, len(q.answer_sources))]]
             rr = 0.0
-            for rank, doc_id in enumerate(topk_doc_ids, start=1):
+            for rank, doc_id in enumerate(top, start=1):
                 if doc_id == relevant_id:
-                    query.rank = rank
+                    q.rank = rank
                     rr = 1.0 / rank
                     break
             s += rr
         return s / len(queries) if queries else 0.0
-    
+
     @staticmethod
-    def recall_at_k(queries : list[Query], k):
+    def recall_at_k(queries, k):
         hits = 0
         for q in queries:
-            # Our query object is assumed to have a .gold_doc_id and .query
-            relevant_id = q.gold_doc_id
-            # Retrieve top-k doc_ids based on the query text
-            topk_doc_ids = set([section.doc_id for section in q.answer_sources[:k]])
-            if relevant_id in topk_doc_ids:
+            relevant_id = _norm_id(q.gold_doc_id)
+            top = {_get_id(sec) for sec in q.answer_sources[:min(k, len(q.answer_sources))]}
+            if relevant_id in top:
                 hits += 1
         return hits / len(queries) if queries else 0.0
