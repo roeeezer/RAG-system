@@ -4,5 +4,5 @@ components/__pycache__/
 tests/__pycache__/
 __pycache__/
 kolzchut/
-kolzchut_small/
 cache/
+logs/
