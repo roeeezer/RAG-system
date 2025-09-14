@@ -6,7 +6,7 @@ This project implements a modular system for processing and retrieving informati
 
 ### Data Files
 - The `kolzchut` folder must contain the extracted data from the zip file
-- The `untracked` folder must contain a `gemini_api_keys.txt` file with at least one Gemini API key
+- The `untracked` folder must contain a `gemini_api_keys.txt` file with at least one Gemini API key (you can create one for free with your google account at https://aistudio.google.com/app/apikey)
 
 ## Component Architecture
 
